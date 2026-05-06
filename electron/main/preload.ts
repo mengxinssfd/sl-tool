@@ -1,18 +1,17 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import Signal from '../Signal';
 
 const preload = {
-  send: (signal: Signal, ...args: unknown[]) => {
-    ipcRenderer.send(signal, ...args);
-  },
-  on: (signal: Signal, listener: (...args: unknown[]) => void) => {
-    ipcRenderer.on(signal, listener);
-  },
-  once: (signal: Signal, listener: (...args: unknown[]) => void) => {
-    ipcRenderer.once(signal, listener);
-  },
-  removeAllListeners: (signal: Signal) => {
-    ipcRenderer.removeAllListeners(signal);
+  openDirectoryDialog: async () => {
+    return new Promise<string | null>((resolve) => {
+      const channel = `OpenDirectoryDialog:${Date.now()}`;
+      ipcRenderer.once(channel, (_e, result) => {
+        resolve(result);
+      });
+      ipcRenderer.send(
+        import.meta.env.VITE_SIGNAL_OPEN_DIRECTORY_DIALOG,
+        channel,
+      );
+    });
   },
 };
 contextBridge.exposeInMainWorld(import.meta.env.VITE_API_KEY, preload);

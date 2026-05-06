@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGameStore, useSelectedGame, SaveData } from '../store/useGameStore';
 import { useText } from '../i18n';
+import { channel } from '@/channel';
 
 export function SaveDetail() {
   const t = useText();
@@ -433,8 +434,8 @@ export function SaveDetail() {
                     className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
                   />
                   <button
-                    onClick={() => {
-                      const path = prompt(t('savePath'));
+                    onClick={async () => {
+                      const path = await channel.openDirectoryDialog();
                       if (path) {
                         setEditGameSavePath(path);
                       }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '../store/useGameStore';
 import { useText } from '../i18n';
+import { channel } from '@/channel';
 
 interface AddGameModalProps {
   isOpen: boolean;
@@ -21,8 +22,8 @@ export function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
     onClose();
   };
 
-  const handlePathSelect = () => {
-    const path = prompt(t('savePath'));
+  const handlePathSelect = async () => {
+    const path = await channel.openDirectoryDialog();
     if (path) {
       setSavePath(path);
     }
