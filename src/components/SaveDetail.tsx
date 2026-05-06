@@ -405,7 +405,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    <span className="line-clamp-1 max-w-[200px]">
+                    <span className="line-clamp-1 max-w-[200px] break-all">
                       {t('savePath')}: {selectedGame.savePath}
                     </span>
                   </button>
@@ -431,7 +431,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                       />
                     </svg>
-                    <span className="line-clamp-1 max-w-[200px]">
+                    <span className="line-clamp-1 max-w-[200px] break-all">
                       {t('backupPath')}:{' '}
                       {selectedGame.backupPath || t('notSet')}
                     </span>

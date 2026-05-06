@@ -3,7 +3,7 @@ import { GameList } from './components/GameList';
 import { SaveDetail } from './components/SaveDetail';
 import { AddGameModal } from './components/AddGameModal';
 import { Toast, ToastType, ToastData } from './components/Toast';
-import { useText, changeLanguage } from './i18n';
+import { useText, changeLanguage, getCurrentLanguage } from './i18n';
 
 export function App() {
   const t = useText();
@@ -54,13 +54,21 @@ export function App() {
             <div className="flex gap-2">
               <button
                 onClick={() => changeLanguage('en')}
-                className="px-4 py-2 bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] rounded-xl hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white transition-all duration-[var(--transition-normal)] text-sm font-medium border border-transparent hover:border-[var(--color-border)]"
+                className={`px-4 py-2 rounded-xl transition-all duration-[var(--transition-normal)] text-sm font-medium ${
+                  getCurrentLanguage() === 'en'
+                    ? 'bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-primary-light)] to-[var(--color-primary-dark)] text-white shadow-[var(--shadow-glow)]'
+                    : 'bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white border border-transparent hover:border-[var(--color-border)]'
+                }`}
               >
                 EN
               </button>
               <button
                 onClick={() => changeLanguage('zh')}
-                className="px-4 py-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-primary-light)] to-[var(--color-primary-dark)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] hover:scale-105 transition-all duration-[var(--transition-normal)] text-sm font-medium"
+                className={`px-4 py-2 rounded-xl transition-all duration-[var(--transition-normal)] text-sm font-medium ${
+                  getCurrentLanguage() === 'zh'
+                    ? 'bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-primary-light)] to-[var(--color-primary-dark)] text-white shadow-[var(--shadow-glow)]'
+                    : 'bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white border border-transparent hover:border-[var(--color-border)]'
+                }`}
               >
                 中文
               </button>
