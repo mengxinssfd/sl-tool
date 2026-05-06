@@ -1,6 +1,20 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 const preload = {
+  // 打开指定路径的文件夹
+  openFolder: async (path: string[]) => {
+    return new Promise<void | string>((resolve) => {
+      const channel = `OpenFolder:${Date.now()}`;
+      ipcRenderer.once(channel, (_e, result) => {
+        resolve(result);
+      });
+      ipcRenderer.send(
+        import.meta.env['VITE_SIGNAL_OPEN_FOLDER'],
+        channel,
+        path,
+      );
+    });
+  },
   // 打开目录选择弹窗
   openDirectoryDialog: async () => {
     return new Promise<string | null>((resolve) => {

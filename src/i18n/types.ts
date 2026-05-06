@@ -55,4 +55,6 @@ export interface TranslationKeys {
   saveRestoreFailed: string;
   saveCopied: string;
   saveCopyFailed: string;
+  openSaveFolder: string;
+  openFolderFailed: string;
 }

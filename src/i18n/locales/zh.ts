@@ -57,4 +57,7 @@ export const zhTranslation: TranslationKeys = {
   saveRestoreFailed: '存档还原失败',
   saveCopied: '存档复制成功',
   saveCopyFailed: '存档复制失败',
+  openSaveFolder: '打开存档文件夹',
+  openFolderFailed: '打开文件夹失败',
+  openBackupFolder: '打开备份文件夹',
 };

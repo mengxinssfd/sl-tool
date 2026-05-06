@@ -121,6 +121,31 @@ export function SaveDetail() {
     setShowEditGameModal(true);
   };
 
+  const handleOpenSaveFolder = async () => {
+    if (!selectedGame) return;
+    const reason = await channel.openFolder([selectedGame.savePath]);
+    if (reason) {
+      console.error('Failed to open save folder:', reason);
+      alert(t('openFolderFailed'));
+    }
+  };
+
+  const handleOpenBackupFolder = async (save: SaveData) => {
+    if (!selectedGame) return;
+    if (!selectedGame.backupPath || !save.backupFileName) {
+      alert(t('noBackupFile'));
+      return;
+    }
+    const reason = await channel.openFolder([
+      selectedGame.backupPath,
+      save.backupFileName,
+    ]);
+    if (reason) {
+      console.error('Failed to open backup folder:', reason);
+      alert(t('openFolderFailed'));
+    }
+  };
+
   const handleEditGame = () => {
     if (!selectedGame || !editGameName.trim() || !editGameSavePath.trim())
       return;
@@ -280,6 +305,25 @@ export function SaveDetail() {
               {t('edit')}
             </button>
             <button
+              onClick={handleOpenSaveFolder}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                />
+              </svg>
+              {t('openSaveFolder')}
+            </button>
+            <button
               onClick={() => setShowAddModal(true)}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2"
             >
@@ -312,6 +356,7 @@ export function SaveDetail() {
           onUpdate={handleUpdateSave}
           onRestore={(save) => handleRestoreSave(save)}
           onCopy={(save) => handleCopySave(save)}
+          onOpenFolder={(save) => handleOpenBackupFolder(save)}
           onEdit={setEditingSave}
           setEditingSave={setEditingSave}
         />

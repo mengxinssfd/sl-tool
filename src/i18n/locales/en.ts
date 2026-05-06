@@ -60,4 +60,7 @@ export const enTranslation: TranslationKeys = {
   saveRestoreFailed: 'Failed to restore save',
   saveCopied: 'Save copied successfully',
   saveCopyFailed: 'Failed to copy save',
+  openSaveFolder: 'Open Save Folder',
+  openFolderFailed: 'Failed to open folder',
+  openBackupFolder: 'Open Backup Folder',
 };

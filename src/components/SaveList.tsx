@@ -10,6 +10,7 @@ interface SaveListProps {
   onUpdate: (saveId: string) => void;
   onRestore: (save: SaveData) => void;
   onCopy: (save: SaveData) => void;
+  onOpenFolder: (save: SaveData) => void;
   onEdit: (save: SaveData) => void;
   setEditingSave: (save: SaveData | null) => void;
 }
@@ -23,6 +24,7 @@ export function SaveList({
   onUpdate,
   onRestore,
   onCopy,
+  onOpenFolder,
   onEdit,
   setEditingSave,
 }: SaveListProps) {
@@ -158,6 +160,25 @@ export function SaveList({
                         strokeLinejoin="round"
                         strokeWidth={2}
                         d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => onOpenFolder(save)}
+                    className="p-2 text-orange-400 hover:text-orange-300 hover:bg-orange-900/20 rounded-lg transition-all"
+                    title={t('openBackupFolder')}
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
                       />
                     </svg>
                   </button>

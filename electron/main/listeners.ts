@@ -1,6 +1,20 @@
-import { IpcMain } from 'electron';
+import { dialog, IpcMainEvent, IpcMain, shell } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
+
+export function addOpenDirectoryDialogListener(ipc: IpcMain) {
+  ipc.on(
+    import.meta.env.VITE_SIGNAL_OPEN_DIRECTORY_DIALOG,
+    async (event: IpcMainEvent, channel: string) => {
+      const result = await dialog.showOpenDialog({
+        properties: ['openDirectory'],
+        title: '选择存档目录',
+      });
+      const path = result.filePaths[0] || null;
+      event.reply(channel, path);
+    },
+  );
+}
 
 export function addSaveBackupListener(ipc: IpcMain) {
   ipc.on(
@@ -82,6 +96,25 @@ export function addRenameBackupListener(ipc: IpcMain) {
       } catch (error) {
         console.error('Error rename save:', error);
         event.reply(channel, String(error));
+      }
+    },
+  );
+}
+
+export function addOpenFolderListener(ipc: IpcMain) {
+  ipc.on(
+    import.meta.env['VITE_SIGNAL_OPEN_FOLDER'],
+    async (event: IpcMainEvent, channel: string, paths: string[]) => {
+      const p = path.join(...paths);
+      if (!fs.existsSync(p)) {
+        event.reply(channel, `${p} unexist`);
+        return;
+      }
+      try {
+        await shell.openPath(p);
+        event.reply(channel);
+      } catch (error) {
+        event.reply(channel, (error as Error).message);
       }
     },
   );

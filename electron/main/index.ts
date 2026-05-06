@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import {
   addOpenDirectoryDialogListener,
+  addOpenFolderListener,
   addDeleteSaveFileListener,
   addSaveBackupListener,
   addRenameBackupListener,
@@ -30,6 +31,7 @@ function createWindow() {
     win.loadFile(path.join(__dirname, '../../dist/index.html'));
   }
   addOpenDirectoryDialogListener(win.webContents.ipc);
+  addOpenFolderListener(win.webContents.ipc);
   addSaveBackupListener(win.webContents.ipc);
   addDeleteSaveFileListener(win.webContents.ipc);
   addRenameBackupListener(win.webContents.ipc);
