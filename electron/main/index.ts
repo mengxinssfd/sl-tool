@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import {
   addOpenDirectoryDialogListener,
@@ -13,12 +13,15 @@ import {
 let win: BrowserWindow | null = null;
 
 function createWindow() {
+  Menu.setApplicationMenu(null);
+
   win = new BrowserWindow({
     width: 1000,
     height: 680,
     minWidth: 800,
     minHeight: 600,
-    title: '单机游戏存档管理工具',
+    title: import.meta.env.VITE_APP_TITLE,
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

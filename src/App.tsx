@@ -40,28 +40,13 @@ export function App() {
                   />
                 </svg>
               </div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-[var(--color-success)] to-[var(--color-success-light)] rounded-full flex items-center justify-center shadow-[var(--shadow-sm)]">
-                <svg
-                  className="w-3 h-3 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gradient">
                 {t('saveManager')}
               </h1>
               <p className="text-sm text-[var(--color-text-muted)]">
-                Game Save Manager Pro
+                Game Save Manager
               </p>
             </div>
           </div>

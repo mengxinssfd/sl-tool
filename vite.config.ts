@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { rmSync } from 'fs';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
@@ -8,14 +8,26 @@ import path from 'path';
 import electron from 'vite-electron-plugin';
 // @ts-ignore
 import { customStart, loadViteEnv } from 'vite-electron-plugin/plugin';
+import * as process from 'node:process';
 
 rmSync('dist-electron', { recursive: true, force: true });
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+  const APP_TITLE = env['VITE_APP_TITLE'];
   return {
     plugins: [
       react(),
       tailwindcss(),
+      {
+        name: 'html-title',
+        transformIndexHtml(html) {
+          return html.replace(
+            /<title>.*?<\/title>/,
+            `<title>${APP_TITLE}</title>`,
+          );
+        },
+      },
       electron({
         include: ['electron'],
         transformOptions: { sourcemap: !!process.env['VSCODE_DEBUG'] },
