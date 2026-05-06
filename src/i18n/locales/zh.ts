@@ -34,4 +34,8 @@ export const zhTranslation: TranslationKeys = {
   updated: '更新',
   new: '新建',
   updatedLabel: '已更新',
+  update: '更新',
+  noOtherSaves: '没有其他存档可复制',
+  selectSourceSave: '请选择要复制的源存档（输入序号）',
+  updatedFrom: '已从',
 };

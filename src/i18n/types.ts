@@ -32,4 +32,8 @@ export interface TranslationKeys {
   updated: string;
   new: string;
   updatedLabel: string;
+  update: string;
+  noOtherSaves: string;
+  selectSourceSave: string;
+  updatedFrom: string;
 }

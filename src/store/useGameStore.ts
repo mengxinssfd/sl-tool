@@ -21,6 +21,7 @@ interface GameStore {
   selectedGameId: string | null;
   addGame: (name: string, savePath: string) => void;
   deleteGame: (id: string) => void;
+  updateGame: (id: string, name: string, savePath: string) => void;
   selectGame: (id: string | null) => void;
   addSave: (gameId: string, name: string, note?: string) => void;
   deleteSave: (gameId: string, saveId: string) => void;
@@ -78,6 +79,16 @@ export const useGameStore = create<GameStore>((set) => ({
         selectedGameId:
           state.selectedGameId === id ? null : state.selectedGameId,
       };
+    });
+  },
+
+  updateGame: (id, name, savePath) => {
+    set((state) => {
+      const newGames = state.games.map((game) =>
+        game.id === id ? { ...game, name, savePath } : game,
+      );
+      saveToStorage(newGames);
+      return { games: newGames };
     });
   },
 

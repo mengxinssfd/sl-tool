@@ -35,4 +35,8 @@ export const enTranslation: TranslationKeys = {
   updated: 'Updated',
   new: 'New',
   updatedLabel: 'Updated',
+  update: 'Update',
+  noOtherSaves: 'No other saves to copy from',
+  selectSourceSave: 'Select source save to copy (enter number)',
+  updatedFrom: 'Updated from',
 };
