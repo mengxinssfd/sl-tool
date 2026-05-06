@@ -1,18 +1,18 @@
 {
-  "name": "electron-react-template",
+  "name": "sl-tool",
   "version": "0.0.0",
-  "description": "electron react template",
+  "description": "save manager",
   "keywords": [
     "electron",
     "react"
   ],
-  "homepage": "https://github.com/mengxinssfd/electron-react-template#readme",
+  "homepage": "https://github.com/mengxinssfd/sl-tool#readme",
   "bugs": {
-    "url": "https://github.com/mengxinssfd/electron-react-template/issues"
+    "url": "https://github.com/mengxinssfd/sl-tool/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mengxinssfd/electron-react-template.git"
+    "url": "git+https://github.com/mengxinssfd/sl-tool.git"
   },
   "license": "MIT",
   "author": "DYH",
