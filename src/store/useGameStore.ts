@@ -1,0 +1,154 @@
+import { create } from 'zustand';
+import { useEffect } from 'react';
+
+export interface SaveData {
+  id: string;
+  name: string;
+  createdAt: number;
+  updatedAt: number;
+  note: string;
+}
+
+export interface Game {
+  id: string;
+  name: string;
+  savePath: string;
+  saves: SaveData[];
+}
+
+interface GameStore {
+  games: Game[];
+  selectedGameId: string | null;
+  addGame: (name: string, savePath: string) => void;
+  deleteGame: (id: string) => void;
+  selectGame: (id: string | null) => void;
+  addSave: (gameId: string, name: string, note?: string) => void;
+  deleteSave: (gameId: string, saveId: string) => void;
+  updateSave: (
+    gameId: string,
+    saveId: string,
+    updates: Partial<SaveData>,
+  ) => void;
+  loadGames: (games: Game[]) => void;
+}
+
+const STORAGE_KEY = 'game-save-manager-data';
+
+const loadFromStorage = (): Game[] => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveToStorage = (games: Game[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(games));
+  } catch {
+    console.error('Failed to save games to storage');
+  }
+};
+
+export const useGameStore = create<GameStore>((set) => ({
+  games: loadFromStorage(),
+  selectedGameId: null,
+
+  addGame: (name, savePath) => {
+    const newGame: Game = {
+      id: Date.now().toString(),
+      name,
+      savePath,
+      saves: [],
+    };
+    set((state) => {
+      const newGames = [...state.games, newGame];
+      saveToStorage(newGames);
+      return { games: newGames };
+    });
+  },
+
+  deleteGame: (id) => {
+    set((state) => {
+      const newGames = state.games.filter((game) => game.id !== id);
+      saveToStorage(newGames);
+      return {
+        games: newGames,
+        selectedGameId:
+          state.selectedGameId === id ? null : state.selectedGameId,
+      };
+    });
+  },
+
+  selectGame: (id) => {
+    set({ selectedGameId: id });
+  },
+
+  addSave: (gameId, name, note = '') => {
+    const newSave: SaveData = {
+      id: Date.now().toString(),
+      name,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      note,
+    };
+    set((state) => {
+      const newGames = state.games.map((game) =>
+        game.id === gameId
+          ? { ...game, saves: [...game.saves, newSave] }
+          : game,
+      );
+      saveToStorage(newGames);
+      return { games: newGames };
+    });
+  },
+
+  deleteSave: (gameId, saveId) => {
+    set((state) => {
+      const newGames = state.games.map((game) =>
+        game.id === gameId
+          ? { ...game, saves: game.saves.filter((save) => save.id !== saveId) }
+          : game,
+      );
+      saveToStorage(newGames);
+      return { games: newGames };
+    });
+  },
+
+  updateSave: (gameId, saveId, updates) => {
+    set((state) => {
+      const newGames = state.games.map((game) =>
+        game.id === gameId
+          ? {
+              ...game,
+              saves: game.saves.map((save) =>
+                save.id === saveId
+                  ? { ...save, ...updates, updatedAt: Date.now() }
+                  : save,
+              ),
+            }
+          : game,
+      );
+      saveToStorage(newGames);
+      return { games: newGames };
+    });
+  },
+
+  loadGames: (games) => {
+    set({ games });
+    saveToStorage(games);
+  },
+}));
+
+export const useSelectedGame = () => {
+  const { games, selectedGameId } = useGameStore();
+  return games.find((game) => game.id === selectedGameId) || null;
+};
+
+export const useAutoSave = () => {
+  const games = useGameStore((state) => state.games);
+  useEffect(() => {
+    saveToStorage(games);
+  }, [games]);
+};
