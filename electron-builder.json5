@@ -1,0 +1,63 @@
+/**
+ * @see https://www.electron.build/configuration/configuration
+ */
+{
+  appId: 'org.example.template',
+  asar: true,
+  directories: {
+    output: 'release/${version}',
+    buildResources: "electron/resources"
+  },
+  files: [
+    'dist-electron',
+    'dist'
+  ],
+  mac: {
+    artifactName: '${productName}_${version}.${ext}',
+    target: [
+      'dmg'
+    ],
+    icon: "electron/resources/icon.icns",
+  },
+  win: {
+    target: [
+      {
+        target: 'nsis',
+        arch: [
+          'x64'
+        ],
+      },
+    ],
+    artifactName: '${productName}_${version}.${ext}',
+    icon: "electron/resources/icon.ico",
+  },
+  linux: {
+    icon: "electron/resources",
+    "target": [
+      {
+        "target": "deb",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "category": "Utility",
+    artifactName: "${productName}-Linux-${version}.${ext}",
+  },
+  //  fileAssociations: [
+  //    {
+  //      ext: [''],
+  //      name: '',
+  //      description: '',
+  //      role: 'Editor',
+  //      icon: 'public/file-icon.png',
+  //    },
+  //  ],
+  nsis: {
+    createDesktopShortcut: 'always',
+    oneClick: false,
+    perMachine: false,
+    allowToChangeInstallationDirectory: true,
+    deleteAppDataOnUninstall: false,
+  },
+}

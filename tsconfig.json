@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    // "jsx"
+    // 为 react 时 tsx 文件要导入 react (不管有没有用到)，tsc后编译文件的后缀是js；div标签会转换为React.createElement("div",...
+    // 为 react-native 时 tsx 文件要导入 react，编译文件的后缀是js；不会转换html标签
+    // 为 react-jsx 时 tsx 文件不需要导入 react，但是会打包 jsx-runtime 依赖，会转换html标签
+    // 为 preserve 时 tsx 文件需要导入 react，编译文件的后缀是jsx，不会转换html标签
+    // 为 react-jsxdev 时 tsx 文件不需要导入 react，但是会打包 jsx-dev-runtime 依赖，会转换html标签
+    "jsx": "react-jsx",
+    "importHelpers": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "strict": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["vitest/globals"]
+  },
+  "include": ["src/**/*", "vite-env.d.ts"]
+}
