@@ -23,6 +23,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
   const [editGameName, setEditGameName] = useState('');
   const [editGameSavePath, setEditGameSavePath] = useState('');
   const [editGameBackupPath, setEditGameBackupPath] = useState('');
+  const [editGameExecutablePath, setEditGameExecutablePath] = useState('');
   const [showUpdateConfirmModal, setShowUpdateConfirmModal] = useState(false);
   const [updateTargetSaveId, setUpdateTargetSaveId] = useState<string | null>(
     null,
@@ -140,7 +141,20 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
     setEditGameName(selectedGame.name);
     setEditGameSavePath(selectedGame.savePath);
     setEditGameBackupPath(selectedGame.backupPath || '');
+    setEditGameExecutablePath(selectedGame.gameExecutablePath || '');
     setShowEditGameModal(true);
+  };
+
+  const handleStartGame = async () => {
+    if (!selectedGame || !selectedGame.gameExecutablePath) {
+      onToast('warning', t('gameExecutablePath'));
+      return;
+    }
+    const reason = await channel.startGame(selectedGame.gameExecutablePath);
+    if (reason) {
+      console.error('Failed to start game:', reason);
+      onToast('error', t('startGameFailed'));
+    }
   };
 
   const handleOpenSaveFolder = async () => {
@@ -186,6 +200,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       editGameName.trim(),
       editGameSavePath.trim(),
       editGameBackupPath.trim(),
+      editGameExecutablePath.trim(),
     );
     setShowEditGameModal(false);
   };
@@ -358,21 +373,6 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
                     />
                   </svg>
                 </div>
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-[var(--color-success)] to-[var(--color-success-light)] rounded-full flex items-center justify-center shadow-[var(--shadow-sm)]">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
@@ -460,6 +460,33 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
                 />
               </svg>
             </button>
+            {selectedGame.gameExecutablePath && (
+              <button
+                onClick={handleStartGame}
+                className="w-11 h-11 px-3 py-2.5 bg-gradient-to-r from-[var(--color-success)] to-[var(--color-success-hover)] text-white rounded-xl hover:shadow-[var(--shadow-md)] transition-all duration-[var(--transition-normal)] font-medium flex items-center justify-center"
+                title={t('startGame')}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </button>
+            )}
             <button
               onClick={() => setShowAddModal(true)}
               className="w-11 h-11 px-3 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] font-medium flex items-center justify-center hover:-translate-y-0.5 active:translate-y-0"
@@ -712,6 +739,43 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
                         strokeLinejoin="round"
                         strokeWidth={2}
                         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
+                  {t('gameExecutablePath')}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={editGameExecutablePath}
+                    onChange={(e) => setEditGameExecutablePath(e.target.value)}
+                    placeholder={t('selectGameExecutablePath')}
+                    className="flex-1 px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
+                  />
+                  <button
+                    onClick={async () => {
+                      const filePath = await channel.openFileDialog();
+                      if (filePath) {
+                        setEditGameExecutablePath(filePath);
+                      }
+                    }}
+                    className="px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)]"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
                       />
                     </svg>
                   </button>

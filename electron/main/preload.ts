@@ -28,6 +28,16 @@ const preload = {
       );
     });
   },
+  // 打开文件选择弹窗
+  openFileDialog: async () => {
+    return new Promise<string | null>((resolve) => {
+      const channel = `OpenFileDialog:${Date.now()}`;
+      ipcRenderer.once(channel, (_e, result) => {
+        resolve(result);
+      });
+      ipcRenderer.send(import.meta.env.VITE_SIGNAL_OPEN_FILE_DIALOG, channel);
+    });
+  },
   // 创建存档：从游戏存档位置复制到备份位置
   saveBackup: async (from: string[], to: string[]) => {
     return new Promise<void | string>((resolve) => {
@@ -69,6 +79,20 @@ const preload = {
         import.meta.env.VITE_SIGNAL_DELETE_SAVE_FILE,
         channel,
         dirPath,
+      );
+    });
+  },
+  // 启动游戏
+  startGame: async (executablePath: string) => {
+    return new Promise<void | string>((resolve) => {
+      const channel = `StartGame:${Date.now()}`;
+      ipcRenderer.once(channel, (_e, result) => {
+        resolve(result);
+      });
+      ipcRenderer.send(
+        import.meta.env.VITE_SIGNAL_EXE_FILE,
+        channel,
+        executablePath,
       );
     });
   },

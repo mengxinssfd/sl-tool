@@ -69,6 +69,12 @@ export const enTranslation: TranslationKeys = {
   savePathDescription: 'Directory where game saves are stored',
   selectBackupPath: 'Select backup path',
   backupPathDescription: 'Directory for storing backup files',
+  gameExecutablePath: 'Game Executable',
+  selectGameExecutablePath: 'Select game executable',
+  gameExecutablePathDescription:
+    'Path to game executable file (.exe, .bat, etc.)',
+  startGame: 'Start Game',
+  startGameFailed: 'Failed to start game',
   saves: 'saves',
   games: 'games',
   getStarted: 'Get Started',

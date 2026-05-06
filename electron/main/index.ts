@@ -6,6 +6,8 @@ import {
   addDeleteSaveFileListener,
   addSaveBackupListener,
   addRenameBackupListener,
+  addOpenFileDialogListener,
+  addStartGameListener,
 } from './listeners';
 
 let win: BrowserWindow | null = null;
@@ -35,6 +37,8 @@ function createWindow() {
   addSaveBackupListener(win.webContents.ipc);
   addDeleteSaveFileListener(win.webContents.ipc);
   addRenameBackupListener(win.webContents.ipc);
+  addOpenFileDialogListener(win.webContents.ipc);
+  addStartGameListener(win.webContents.ipc);
 }
 
 app.whenReady().then(createWindow);

@@ -14,13 +14,20 @@ export function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
   const [gameName, setGameName] = useState('');
   const [savePath, setSavePath] = useState('');
   const [backupPath, setBackupPath] = useState('');
+  const [gameExecutablePath, setGameExecutablePath] = useState('');
 
   const handleSubmit = () => {
     if (!gameName.trim() || !savePath.trim()) return;
-    addGame(gameName.trim(), savePath.trim(), backupPath.trim());
+    addGame(
+      gameName.trim(),
+      savePath.trim(),
+      backupPath.trim(),
+      gameExecutablePath.trim(),
+    );
     setGameName('');
     setSavePath('');
     setBackupPath('');
+    setGameExecutablePath('');
     onClose();
   };
 
@@ -35,6 +42,13 @@ export function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
     const path = await channel.openDirectoryDialog();
     if (path) {
       setBackupPath(path);
+    }
+  };
+
+  const handleGameExecutablePathSelect = async () => {
+    const filePath = await channel.openFileDialog();
+    if (filePath) {
+      setGameExecutablePath(filePath);
     }
   };
 
@@ -195,6 +209,54 @@ export function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
                 />
               </svg>
               {t('backupPathDescription')}
+            </p>
+          </div>
+          <div>
+            <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
+              {t('gameExecutablePath')}
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={gameExecutablePath}
+                onChange={(e) => setGameExecutablePath(e.target.value)}
+                placeholder={t('selectGameExecutablePath')}
+                className="flex-1 px-4 py-3 bg-[var(--color-bg-card)]/80 text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-fast)]"
+              />
+              <button
+                onClick={handleGameExecutablePathSelect}
+                className="px-4 py-3 bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] rounded-xl hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white transition-all duration-[var(--transition-normal)] hover:scale-105"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                  />
+                </svg>
+              </button>
+            </div>
+            <p className="text-xs text-[var(--color-text-muted)] mt-2 flex items-center gap-1.5">
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+              {t('gameExecutablePathDescription')}
             </p>
           </div>
           <div className="flex gap-3 pt-2">

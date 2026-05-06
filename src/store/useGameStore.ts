@@ -15,19 +15,26 @@ export interface Game {
   name: string;
   savePath: string;
   backupPath: string;
+  gameExecutablePath: string;
   saves: SaveData[];
 }
 
 interface GameStore {
   games: Game[];
   selectedGameId: string | null;
-  addGame: (name: string, savePath: string, backupPath?: string) => void;
+  addGame: (
+    name: string,
+    savePath: string,
+    backupPath?: string,
+    gameExecutablePath?: string,
+  ) => void;
   deleteGame: (id: string) => void;
   updateGame: (
     id: string,
     name: string,
     savePath: string,
     backupPath: string,
+    gameExecutablePath: string,
   ) => void;
   selectGame: (id: string | null) => void;
   addSave: (
@@ -68,12 +75,13 @@ export const useGameStore = create<GameStore>((set) => ({
   games: loadFromStorage(),
   selectedGameId: null,
 
-  addGame: (name, savePath, backupPath = '') => {
+  addGame: (name, savePath, backupPath = '', gameExecutablePath = '') => {
     const newGame: Game = {
       id: Date.now().toString(),
       name,
       savePath,
       backupPath,
+      gameExecutablePath,
       saves: [],
     };
     set((state) => {
@@ -100,10 +108,13 @@ export const useGameStore = create<GameStore>((set) => ({
     name: string,
     savePath: string,
     backupPath: string,
+    gameExecutablePath: string,
   ) => {
     set((state) => {
       const newGames = state.games.map((game) =>
-        game.id === id ? { ...game, name, savePath, backupPath } : game,
+        game.id === id
+          ? { ...game, name, savePath, backupPath, gameExecutablePath }
+          : game,
       );
       saveToStorage(newGames);
       return { games: newGames };

@@ -1,6 +1,7 @@
 import { dialog, IpcMainEvent, IpcMain, shell } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawn } from 'node:child_process';
 
 export function addOpenDirectoryDialogListener(ipc: IpcMain) {
   ipc.on(
@@ -12,6 +13,24 @@ export function addOpenDirectoryDialogListener(ipc: IpcMain) {
       });
       const path = result.filePaths[0] || null;
       event.reply(channel, path);
+    },
+  );
+}
+
+export function addOpenFileDialogListener(ipc: IpcMain) {
+  ipc.on(
+    import.meta.env.VITE_SIGNAL_OPEN_FILE_DIALOG,
+    async (event: IpcMainEvent, channel: string) => {
+      const result = await dialog.showOpenDialog({
+        properties: ['openFile'],
+        title: '选择游戏执行文件',
+        filters: [
+          { name: '可执行文件', extensions: ['exe', 'bat', 'cmd'] },
+          { name: '所有文件', extensions: ['*'] },
+        ],
+      });
+      const filePath = result.filePaths[0] || null;
+      event.reply(channel, filePath);
     },
   );
 }
@@ -112,6 +131,29 @@ export function addOpenFolderListener(ipc: IpcMain) {
       }
       try {
         await shell.openPath(p);
+        event.reply(channel);
+      } catch (error) {
+        event.reply(channel, (error as Error).message);
+      }
+    },
+  );
+}
+
+export function addStartGameListener(ipc: IpcMain) {
+  ipc.on(
+    import.meta.env.VITE_SIGNAL_EXE_FILE,
+    async (event: IpcMainEvent, channel: string, executablePath: string) => {
+      if (!fs.existsSync(executablePath)) {
+        event.reply(channel, `${executablePath} unexist`);
+        return;
+      }
+      try {
+        const cwd = path.dirname(executablePath);
+        spawn(executablePath, [], {
+          cwd,
+          detached: true,
+          stdio: 'ignore',
+        });
         event.reply(channel);
       } catch (error) {
         event.reply(channel, (error as Error).message);

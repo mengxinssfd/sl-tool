@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
-interface ToastData {
+export interface ToastData {
   id: string;
   type: ToastType;
   message: string;

@@ -64,6 +64,11 @@ export interface TranslationKeys {
   savePathDescription: string;
   selectBackupPath: string;
   backupPathDescription: string;
+  gameExecutablePath: string;
+  selectGameExecutablePath: string;
+  gameExecutablePathDescription: string;
+  startGame: string;
+  startGameFailed: string;
   saves: string;
   games: string;
   getStarted: string;
