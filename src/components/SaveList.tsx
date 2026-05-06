@@ -32,22 +32,30 @@ export function SaveList({
 
   if (saves.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-gray-500">
-        <svg
-          className="w-16 h-16 mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-          />
-        </svg>
-        <p>{t('noSaves')}</p>
-        <p className="text-sm">{t('noSavesHint')}</p>
+      <div className="flex flex-col items-center justify-center h-full text-center animate-fadeIn">
+        <div className="relative mb-6">
+          <div className="w-24 h-24 bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-card)] rounded-full flex items-center justify-center shadow-[var(--shadow-lg)]">
+            <svg
+              className="w-12 h-12 text-[var(--color-text-muted)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+          </div>
+        </div>
+        <h3 className="text-xl font-semibold text-[var(--color-text-secondary)] mb-2">
+          {t('noSaves')}
+        </h3>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          {t('noSavesHint')}
+        </p>
       </div>
     );
   }
@@ -56,13 +64,14 @@ export function SaveList({
     <div className="space-y-4">
       {saves
         .sort((a, b) => b.updatedAt - a.updatedAt)
-        .map((save) => (
+        .map((save, index) => (
           <div
             key={save.id}
-            className="bg-gray-800 p-4 transition-all duration-200 hover:bg-gray-700 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 border border-transparent"
+            className="group relative bg-gradient-to-br from-[var(--color-bg-card)] to-[var(--color-bg-secondary)] rounded-2xl p-5 transition-all duration-[var(--transition-normal)] hover:shadow-[var(--shadow-lg)] border border-[var(--color-border)] hover:border-[var(--color-border-hover)] animate-slideIn hover-lift cursor-pointer"
+            style={{ animationDelay: `${index * 50}ms` }}
           >
             {editingSave?.id === save.id ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <input
                   type="text"
                   value={editingSave.name}
@@ -72,7 +81,8 @@ export function SaveList({
                       name: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
+                  autoFocus
                 />
                 <textarea
                   value={editingSave.note}
@@ -83,19 +93,19 @@ export function SaveList({
                     })
                   }
                   placeholder={t('notePlaceholder')}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+                  className="w-full px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)] resize-none"
                   rows={2}
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={onSaveEdit}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                    className="px-5 py-2.5 bg-gradient-to-r from-[var(--color-success)] to-[var(--color-success-hover)] text-white rounded-xl hover:shadow-[var(--shadow-md)] transition-all duration-[var(--transition-normal)] text-sm font-medium"
                   >
                     {t('save')}
                   </button>
                   <button
                     onClick={() => setEditingSave(null)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                    className="px-5 py-2.5 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)] text-sm font-medium"
                   >
                     {t('cancel')}
                   </button>
@@ -103,31 +113,84 @@ export function SaveList({
               </div>
             ) : (
               <div className="flex justify-between items-start">
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-white">{save.name}</h3>
-                    <span className="px-2 py-0.5 bg-gray-700 text-gray-300 text-xs rounded-full">
-                      {save.createdAt === save.updatedAt
-                        ? t('new')
-                        : t('updatedLabel')}
-                    </span>
+                    <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-secondary)]/10 rounded-xl flex items-center justify-center">
+                      <svg
+                        className="w-5 h-5 text-[var(--color-primary-light)]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-[var(--color-text-primary)] text-lg">
+                        {save.name}
+                      </h3>
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mt-1 ${
+                          save.createdAt === save.updatedAt
+                            ? 'bg-gradient-to-r from-[var(--color-primary)]/20 to-[var(--color-secondary)]/20 text-[var(--color-primary-light)]'
+                            : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]'
+                        }`}
+                      >
+                        {save.createdAt === save.updatedAt
+                          ? t('new')
+                          : t('updatedLabel')}
+                      </span>
+                    </div>
                   </div>
                   {save.note && (
-                    <p className="text-gray-400 text-sm mt-2">{save.note}</p>
+                    <p className="text-[var(--color-text-secondary)] text-sm mt-3 pl-13 line-clamp-2">
+                      {save.note}
+                    </p>
                   )}
-                  <div className="flex gap-6 mt-3 text-xs text-gray-500">
-                    <span>
+                  <div className="flex flex-wrap gap-4 mt-3 text-xs text-[var(--color-text-muted)]">
+                    <span className="flex items-center gap-1.5">
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
                       {t('created')}: {formatDate(save.createdAt)}
                     </span>
-                    <span>
+                    <span className="flex items-center gap-1.5">
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
                       {t('updated')}: {formatDate(save.updatedAt)}
                     </span>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2 ml-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--transition-normal)]">
                   <button
                     onClick={() => onEdit(save)}
-                    className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded-lg transition-all"
+                    className="p-2.5 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-fast)]"
                     title={t('edit')}
                   >
                     <svg
@@ -146,7 +209,7 @@ export function SaveList({
                   </button>
                   <button
                     onClick={() => onCopy(save)}
-                    className="p-2 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-900/20 rounded-lg transition-all"
+                    className="p-2.5 bg-gradient-to-br from-[var(--color-accent)]/20 to-[var(--color-secondary)]/10 text-[var(--color-accent)] rounded-xl hover:from-[var(--color-accent)]/30 hover:to-[var(--color-secondary)]/20 transition-all duration-[var(--transition-fast)]"
                     title={t('copy')}
                   >
                     <svg
@@ -165,7 +228,7 @@ export function SaveList({
                   </button>
                   <button
                     onClick={() => onOpenFolder(save)}
-                    className="p-2 text-orange-400 hover:text-orange-300 hover:bg-orange-900/20 rounded-lg transition-all"
+                    className="p-2.5 bg-gradient-to-br from-[var(--color-warning)]/20 to-[var(--color-warning-light)]/10 text-[var(--color-warning)] rounded-xl hover:from-[var(--color-warning)]/30 hover:to-[var(--color-warning-light)]/20 transition-all duration-[var(--transition-fast)]"
                     title={t('openBackupFolder')}
                   >
                     <svg
@@ -184,7 +247,7 @@ export function SaveList({
                   </button>
                   <button
                     onClick={() => onUpdate(save.id)}
-                    className="p-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-900/20 rounded-lg transition-all"
+                    className="p-2.5 bg-gradient-to-br from-[var(--color-info)]/20 to-[var(--color-info-light)]/10 text-[var(--color-info)] rounded-xl hover:from-[var(--color-info)]/30 hover:to-[var(--color-info-light)]/20 transition-all duration-[var(--transition-fast)]"
                     title={t('update')}
                   >
                     <svg
@@ -203,7 +266,7 @@ export function SaveList({
                   </button>
                   <button
                     onClick={() => onRestore(save)}
-                    className="p-2 text-green-400 hover:text-green-300 hover:bg-green-900/20 rounded-lg transition-all"
+                    className="p-2.5 bg-gradient-to-br from-[var(--color-success)]/20 to-[var(--color-success-light)]/10 text-[var(--color-success)] rounded-xl hover:from-[var(--color-success)]/30 hover:to-[var(--color-success-light)]/20 transition-all duration-[var(--transition-fast)]"
                     title={t('restore')}
                   >
                     <svg
@@ -222,7 +285,7 @@ export function SaveList({
                   </button>
                   <button
                     onClick={() => onDelete(save.id)}
-                    className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-all"
+                    className="p-2.5 bg-gradient-to-br from-[var(--color-danger)]/20 to-[var(--color-danger-light)]/10 text-[var(--color-danger)] rounded-xl hover:from-[var(--color-danger)]/30 hover:to-[var(--color-danger-light)]/20 transition-all duration-[var(--transition-fast)]"
                     title={t('delete')}
                   >
                     <svg

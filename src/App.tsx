@@ -2,62 +2,97 @@ import { useState } from 'react';
 import { GameList } from './components/GameList';
 import { SaveDetail } from './components/SaveDetail';
 import { AddGameModal } from './components/AddGameModal';
+import { Toast, ToastType, ToastData } from './components/Toast';
 import { useText, changeLanguage } from './i18n';
 
 export function App() {
   const t = useText();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [toasts, setToasts] = useState<ToastData[]>([]);
+
+  const addToast = (type: ToastType, message: string) => {
+    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    setToasts((prev) => [...prev, { id, type, message }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-950">
-      <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+    <div className="h-screen flex flex-col bg-[var(--color-bg-primary)] overflow-hidden">
+      <header className="bg-[var(--color-bg-secondary)]/80 backdrop-blur-xl border-b border-[var(--color-border)] px-6 py-4 shadow-[var(--shadow-lg)]">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-primary-light)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center shadow-[var(--shadow-glow-lg)]">
+                <svg
+                  className="w-7 h-7 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-[var(--color-success)] to-[var(--color-success-light)] rounded-full flex items-center justify-center shadow-[var(--shadow-sm)]">
+                <svg
+                  className="w-3 h-3 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">
+              <h1 className="text-2xl font-bold text-gradient">
                 {t('saveManager')}
               </h1>
-              <p className="text-sm text-gray-400">Game Save Manager</p>
+              <p className="text-sm text-[var(--color-text-muted)]">
+                Game Save Manager Pro
+              </p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => changeLanguage('en')}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
-            >
-              {t('english')}
-            </button>
-            <button
-              onClick={() => changeLanguage('zh')}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
-            >
-              {t('chinese')}
-            </button>
+          <div className="flex items-center gap-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => changeLanguage('en')}
+                className="px-4 py-2 bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] rounded-xl hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white transition-all duration-[var(--transition-normal)] text-sm font-medium border border-transparent hover:border-[var(--color-border)]"
+              >
+                EN
+              </button>
+              <button
+                onClick={() => changeLanguage('zh')}
+                className="px-4 py-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-primary-light)] to-[var(--color-primary-dark)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] hover:scale-105 transition-all duration-[var(--transition-normal)] text-sm font-medium"
+              >
+                中文
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        <div className="w-80 flex-shrink-0 border-r border-gray-700">
-          <GameList onAddGame={() => setShowAddModal(true)} />
+        <div className="w-80 flex-shrink-0 border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+          <GameList
+            onAddGame={() => setShowAddModal(true)}
+            onToast={addToast}
+          />
         </div>
         <div className="flex-1 overflow-hidden">
-          <SaveDetail />
+          <SaveDetail onToast={addToast} />
         </div>
       </div>
 
@@ -65,6 +100,8 @@ export function App() {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
       />
+
+      <Toast toasts={toasts} removeToast={removeToast} />
     </div>
   );
 }

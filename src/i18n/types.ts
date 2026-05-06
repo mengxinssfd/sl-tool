@@ -57,4 +57,16 @@ export interface TranslationKeys {
   saveCopyFailed: string;
   openSaveFolder: string;
   openFolderFailed: string;
+  openBackupFolder: string;
+  gameName: string;
+  enterGameName: string;
+  selectSavePath: string;
+  savePathDescription: string;
+  selectBackupPath: string;
+  backupPathDescription: string;
+  saves: string;
+  games: string;
+  getStarted: string;
+  notSet: string;
+  gameDeleted: string;
 }

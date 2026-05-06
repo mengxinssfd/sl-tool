@@ -1,10 +1,17 @@
 import { useState } from 'react';
+import path from 'path';
 import { useGameStore, useSelectedGame, SaveData } from '../store/useGameStore';
 import { useText } from '../i18n';
 import { channel } from '@/channel';
 import { SaveList } from './SaveList';
+import { ConfirmDialog } from './ConfirmDialog';
+import { ToastType } from './Toast';
 
-export function SaveDetail() {
+interface SaveDetailProps {
+  onToast: (type: ToastType, message: string) => void;
+}
+
+export function SaveDetail({ onToast }: SaveDetailProps) {
   const t = useText();
   const selectedGame = useSelectedGame();
   const { addSave, deleteSave, updateSave, updateGame } = useGameStore();
@@ -18,6 +25,14 @@ export function SaveDetail() {
   const [editGameBackupPath, setEditGameBackupPath] = useState('');
   const [showUpdateConfirmModal, setShowUpdateConfirmModal] = useState(false);
   const [updateTargetSaveId, setUpdateTargetSaveId] = useState<string | null>(
+    null,
+  );
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deleteTargetSaveId, setDeleteTargetSaveId] = useState<string | null>(
+    null,
+  );
+  const [showRestoreConfirmModal, setShowRestoreConfirmModal] = useState(false);
+  const [restoreTargetSave, setRestoreTargetSave] = useState<SaveData | null>(
     null,
   );
 
@@ -36,7 +51,7 @@ export function SaveDetail() {
     if (!newSaveName.trim() || !selectedGame) return;
 
     if (!selectedGame.backupPath) {
-      alert(t('backupPathNotSet'));
+      onToast('warning', t('backupPathNotSet'));
       return;
     }
 
@@ -57,20 +72,25 @@ export function SaveDetail() {
       setNewSaveName('');
       setNewSaveNote('');
       setShowAddModal(false);
-      alert(t('saveCreated'));
+      onToast('success', t('saveCreated'));
     } else {
       console.error('saveCreateFailed', reason);
-      alert(t('saveCreateFailed'));
+      onToast('error', t('saveCreateFailed'));
     }
   };
 
-  const handleDeleteSave = async (saveId: string) => {
-    if (!selectedGame) return;
+  const handleDeleteSave = (saveId: string) => {
+    setDeleteTargetSaveId(saveId);
+    setShowDeleteConfirmModal(true);
+  };
 
-    const save = selectedGame.saves.find((s) => s.id === saveId);
-    if (!save) return;
+  const handleConfirmDelete = async () => {
+    if (!selectedGame || !deleteTargetSaveId) return;
 
-    if (!confirm(t('deleteConfirm'))) {
+    const save = selectedGame.saves.find((s) => s.id === deleteTargetSaveId);
+    if (!save) {
+      setShowDeleteConfirmModal(false);
+      setDeleteTargetSaveId(null);
       return;
     }
 
@@ -83,12 +103,14 @@ export function SaveDetail() {
     }
 
     if (!reason) {
-      alert(t('saveDeleted'));
+      onToast('success', t('saveDeleted'));
     } else {
       console.error('saveDeleteFailed', reason);
-      alert(t('saveDeleteFailed'));
+      onToast('error', t('saveDeleteFailed'));
     }
-    deleteSave(selectedGame.id, saveId);
+    deleteSave(selectedGame.id, deleteTargetSaveId);
+    setShowDeleteConfirmModal(false);
+    setDeleteTargetSaveId(null);
   };
 
   const handleSaveEdit = () => {
@@ -126,23 +148,33 @@ export function SaveDetail() {
     const reason = await channel.openFolder([selectedGame.savePath]);
     if (reason) {
       console.error('Failed to open save folder:', reason);
-      alert(t('openFolderFailed'));
+      onToast('error', t('openFolderFailed'));
     }
   };
 
   const handleOpenBackupFolder = async (save: SaveData) => {
     if (!selectedGame) return;
     if (!selectedGame.backupPath || !save.backupFileName) {
-      alert(t('noBackupFile'));
+      onToast('warning', t('noBackupFile'));
       return;
     }
-    const reason = await channel.openFolder([
+    const backupFolderPath = path.join(
       selectedGame.backupPath,
       save.backupFileName,
-    ]);
+    );
+    const reason = await channel.openFolder([backupFolderPath]);
     if (reason) {
       console.error('Failed to open backup folder:', reason);
-      alert(t('openFolderFailed'));
+      onToast('error', t('openFolderFailed'));
+    }
+  };
+
+  const handleOpenBackupFolderDirectly = async () => {
+    if (!selectedGame || !selectedGame.backupPath) return;
+    const reason = await channel.openFolder([selectedGame.backupPath]);
+    if (reason) {
+      console.error('Failed to open backup folder:', reason);
+      onToast('error', t('openFolderFailed'));
     }
   };
 
@@ -170,10 +202,16 @@ export function SaveDetail() {
     const targetSave = selectedGame.saves.find(
       (s) => s.id === updateTargetSaveId,
     );
-    if (!targetSave) return;
+    if (!targetSave) {
+      setShowUpdateConfirmModal(false);
+      setUpdateTargetSaveId(null);
+      return;
+    }
 
     if (!selectedGame.backupPath) {
-      alert(t('backupPathNotSet'));
+      onToast('warning', t('backupPathNotSet'));
+      setShowUpdateConfirmModal(false);
+      setUpdateTargetSaveId(null);
       return;
     }
 
@@ -186,44 +224,50 @@ export function SaveDetail() {
       updateSave(selectedGame.id, updateTargetSaveId, {
         updatedAt: Date.now(),
       });
-      setUpdateTargetSaveId(null);
-      alert(t('saveUpdated'));
+      onToast('success', t('saveUpdated'));
     } else {
       console.error('saveUpdateFailed', reason);
-      alert(t('saveUpdateFailed'));
+      onToast('error', t('saveUpdateFailed'));
     }
+    setShowUpdateConfirmModal(false);
+    setUpdateTargetSaveId(null);
   };
 
-  const handleRestoreSave = async (save: SaveData) => {
+  const handleRestoreSave = (save: SaveData) => {
     if (!selectedGame) return;
 
     if (!selectedGame.backupPath || !save.backupFileName) {
-      alert(t('noBackupFile'));
+      onToast('warning', t('noBackupFile'));
       return;
     }
 
-    if (!confirm(t('restoreConfirm'))) {
-      return;
-    }
+    setRestoreTargetSave(save);
+    setShowRestoreConfirmModal(true);
+  };
+
+  const handleConfirmRestore = async () => {
+    if (!selectedGame || !restoreTargetSave) return;
 
     const reason = await channel.saveBackup(
-      [selectedGame.backupPath, save.backupFileName],
+      [selectedGame.backupPath, restoreTargetSave.backupFileName],
       [selectedGame.savePath],
     );
 
     if (!reason) {
-      alert(t('saveRestored'));
+      onToast('success', t('saveRestored'));
     } else {
       console.error('saveRestoreFailed', reason);
-      alert(t('saveRestoreFailed'));
+      onToast('error', t('saveRestoreFailed'));
     }
+    setShowRestoreConfirmModal(false);
+    setRestoreTargetSave(null);
   };
 
   const handleCopySave = async (save: SaveData) => {
     if (!selectedGame) return;
 
     if (!selectedGame.backupPath || !save.backupFileName) {
-      alert(t('noBackupFile'));
+      onToast('warning', t('noBackupFile'));
       return;
     }
     const name = `${save.name} (${t('copy')})`;
@@ -236,10 +280,10 @@ export function SaveDetail() {
 
     if (!reason) {
       addSave(selectedGame.id, name, save.note, newBackupFileName);
-      alert(t('saveCopied'));
+      onToast('success', t('saveCopied'));
     } else {
       console.error('saveCopyFailed', reason);
-      alert(t('saveCopyFailed'));
+      onToast('error', t('saveCopyFailed'));
     }
   };
 
@@ -252,42 +296,155 @@ export function SaveDetail() {
 
   if (!selectedGame) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-gray-900 text-gray-500">
-        <svg
-          className="w-24 h-24 mb-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-          />
-        </svg>
-        <h3 className="text-xl font-semibold mb-2">{t('selectGame')}</h3>
-        <p>{t('selectGameHint')}</p>
+      <div className="h-full flex flex-col items-center justify-center bg-[var(--color-bg-primary)]">
+        <div className="text-center animate-fadeIn">
+          <div className="relative mb-8">
+            <div className="w-28 h-28 bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-card)] rounded-full flex items-center justify-center shadow-[var(--shadow-xl)]">
+              <svg
+                className="w-14 h-14 text-[var(--color-text-muted)]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+                />
+              </svg>
+            </div>
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-[var(--color-bg-card)] rounded-full border border-[var(--color-border)] shadow-[var(--shadow-md)]">
+              <span className="text-xs text-[var(--color-text-muted)]">
+                {t('selectGame')}
+              </span>
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold text-[var(--color-text-secondary)] mb-3">
+            {t('selectGame')}
+          </h3>
+          <p className="text-[var(--color-text-muted)] max-w-[300px] mx-auto">
+            {t('selectGameHint')}
+          </p>
+          <div className="mt-8 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+            <div className="w-8 h-px bg-gradient-to-r from-transparent to-[var(--color-border)]"></div>
+            <span>{t('getStarted')}</span>
+            <div className="w-8 h-px bg-gradient-to-l from-transparent to-[var(--color-border)]"></div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-900">
-      <div className="p-6 border-b border-gray-700">
+    <div className="h-full flex flex-col bg-[var(--color-bg-primary)]">
+      <div className="p-6 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50 backdrop-blur-sm">
         <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-white">
-              {selectedGame.name}
-            </h2>
-            <p className="text-gray-400 mt-1">
-              {t('savePath')}: {selectedGame.savePath}
-            </p>
+          <div className="flex-1">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center shadow-[var(--shadow-glow)]">
+                  <svg
+                    className="w-7 h-7 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    />
+                  </svg>
+                </div>
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-[var(--color-success)] to-[var(--color-success-light)] rounded-full flex items-center justify-center shadow-[var(--shadow-sm)]">
+                  <svg
+                    className="w-3 h-3 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+                  {selectedGame.name}
+                  <span className="px-3 py-1 bg-gradient-to-r from-[var(--color-primary)]/20 to-[var(--color-secondary)]/20 text-[var(--color-primary-light)] text-xs font-medium rounded-full">
+                    {selectedGame.saves.length} {t('saves')}
+                  </span>
+                </h2>
+                <div className="flex flex-wrap gap-4 mt-2 text-sm">
+                  <button
+                    onClick={handleOpenSaveFolder}
+                    className="flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary-light)] transition-colors cursor-pointer"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    <span className="line-clamp-1 max-w-[200px]">
+                      {t('savePath')}: {selectedGame.savePath}
+                    </span>
+                  </button>
+                  <button
+                    onClick={handleOpenBackupFolderDirectly}
+                    disabled={!selectedGame.backupPath}
+                    className={`flex items-center gap-2 transition-colors cursor-pointer ${
+                      selectedGame.backupPath
+                        ? 'text-[var(--color-text-muted)] hover:text-[var(--color-primary-light)]'
+                        : 'text-[var(--color-text-muted)] cursor-not-allowed'
+                    }`}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                    <span className="line-clamp-1 max-w-[200px]">
+                      {t('backupPath')}:{' '}
+                      {selectedGame.backupPath || t('notSet')}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-2 ml-6">
             <button
               onClick={handleOpenEditGameModal}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+              className="w-11 h-11 px-3 py-2.5 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)] font-medium flex items-center justify-center border border-transparent hover:border-[var(--color-border)]"
+              title={t('edit')}
             >
               <svg
                 className="w-5 h-5"
@@ -302,30 +459,11 @@ export function SaveDetail() {
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
               </svg>
-              {t('edit')}
-            </button>
-            <button
-              onClick={handleOpenSaveFolder}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M20 20H4a2 2 0 01-2-2V6a2 2 0 012-2h5.172a1 1 0 01.707.293l5.858 5.857a1 1 0 01.293.707V18a2 2 0 01-2 2z"
-                />
-              </svg>
-              {t('openSaveFolder')}
             </button>
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2"
+              className="w-11 h-11 px-3 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] font-medium flex items-center justify-center hover:-translate-y-0.5 active:translate-y-0"
+              title={t('newSave')}
             >
               <svg
                 className="w-5 h-5"
@@ -340,37 +478,73 @@ export function SaveDetail() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              {t('newSave')}
             </button>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
-        <SaveList
-          saves={selectedGame.saves}
-          editingSave={editingSave}
-          formatDate={formatDate}
-          onDelete={handleDeleteSave}
-          onSaveEdit={handleSaveEdit}
-          onUpdate={handleUpdateSave}
-          onRestore={(save) => handleRestoreSave(save)}
-          onCopy={(save) => handleCopySave(save)}
-          onOpenFolder={(save) => handleOpenBackupFolder(save)}
-          onEdit={setEditingSave}
-          setEditingSave={setEditingSave}
-        />
+      <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+        <div className="max-w-5xl mx-auto">
+          <SaveList
+            saves={selectedGame.saves}
+            editingSave={editingSave}
+            formatDate={formatDate}
+            onDelete={handleDeleteSave}
+            onSaveEdit={handleSaveEdit}
+            onUpdate={handleUpdateSave}
+            onRestore={(save) => handleRestoreSave(save)}
+            onCopy={(save) => handleCopySave(save)}
+            onOpenFolder={(save) => handleOpenBackupFolder(save)}
+            onEdit={setEditingSave}
+            setEditingSave={setEditingSave}
+          />
+        </div>
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold text-white mb-4">
-              {t('newSave')}
-            </h3>
-            <div className="space-y-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-md p-4">
+          <div className="bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-card)] rounded-2xl p-8 w-full max-w-[50vw] min-w-[320px] shadow-[var(--shadow-xl)] animate-scaleIn border border-[var(--color-border)] glass max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-xl flex items-center justify-center">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </div>
+                {t('newSave')}
+              </h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-2 hover:bg-[var(--color-bg-tertiary)] rounded-lg transition-colors"
+              >
+                <svg
+                  className="w-5 h-5 text-[var(--color-text-muted)]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-5">
               <div>
-                <label className="block text-gray-300 text-sm mb-1">
+                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
                   {t('saveName')}
                 </label>
                 <input
@@ -378,32 +552,33 @@ export function SaveDetail() {
                   value={newSaveName}
                   onChange={(e) => setNewSaveName(e.target.value)}
                   placeholder={t('saveName')}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
+                  autoFocus
                 />
               </div>
               <div>
-                <label className="block text-gray-300 text-sm mb-1">
+                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
                   {t('note')} ({t('cancel')})
                 </label>
                 <textarea
                   value={newSaveNote}
                   onChange={(e) => setNewSaveNote(e.target.value)}
                   placeholder={t('notePlaceholder')}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+                  className="w-full px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)] resize-none"
                   rows={3}
                 />
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  className="flex-1 px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)] font-medium"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   onClick={handleAddSave}
                   disabled={!newSaveName.trim()}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {t('create')}
                 </button>
@@ -414,14 +589,49 @@ export function SaveDetail() {
       )}
 
       {showEditGameModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold text-white mb-4">
-              {t('edit')} {t('saveManager')}
-            </h3>
-            <div className="space-y-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-md p-4">
+          <div className="bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-card)] rounded-2xl p-8 w-full max-w-[50vw] min-w-[320px] shadow-[var(--shadow-xl)] animate-scaleIn border border-[var(--color-border)] glass max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-info)] to-[var(--color-info-light)] rounded-xl flex items-center justify-center">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                </div>
+                {t('edit')} {t('saveManager')}
+              </h3>
+              <button
+                onClick={() => setShowEditGameModal(false)}
+                className="p-2 hover:bg-[var(--color-bg-tertiary)] rounded-lg transition-colors"
+              >
+                <svg
+                  className="w-5 h-5 text-[var(--color-text-muted)]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-5">
               <div>
-                <label className="block text-gray-300 text-sm mb-1">
+                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
                   {t('saveManager')}
                 </label>
                 <input
@@ -429,11 +639,12 @@ export function SaveDetail() {
                   value={editGameName}
                   onChange={(e) => setEditGameName(e.target.value)}
                   placeholder={t('saveManager')}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
+                  autoFocus
                 />
               </div>
               <div>
-                <label className="block text-gray-300 text-sm mb-1">
+                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
                   {t('savePath')}
                 </label>
                 <div className="flex gap-2">
@@ -442,7 +653,7 @@ export function SaveDetail() {
                     value={editGameSavePath}
                     onChange={(e) => setEditGameSavePath(e.target.value)}
                     placeholder={t('savePath')}
-                    className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
+                    className="flex-1 px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
                   />
                   <button
                     onClick={async () => {
@@ -451,14 +662,26 @@ export function SaveDetail() {
                         setEditGameSavePath(path);
                       }
                     }}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    className="px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)]"
                   >
-                    Browse
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
+                    </svg>
                   </button>
                 </div>
               </div>
               <div>
-                <label className="block text-gray-300 text-sm mb-1">
+                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
                   {t('backupPath')}
                 </label>
                 <div className="flex gap-2">
@@ -467,7 +690,7 @@ export function SaveDetail() {
                     value={editGameBackupPath}
                     onChange={(e) => setEditGameBackupPath(e.target.value)}
                     placeholder={t('backupPath')}
-                    className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500"
+                    className="flex-1 px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
                   />
                   <button
                     onClick={async () => {
@@ -476,16 +699,28 @@ export function SaveDetail() {
                         setEditGameBackupPath(path);
                       }
                     }}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    className="px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)]"
                   >
-                    Browse
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
+                    </svg>
                   </button>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setShowEditGameModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  className="flex-1 px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)] font-medium"
                 >
                   {t('cancel')}
                 </button>
@@ -496,7 +731,7 @@ export function SaveDetail() {
                     !editGameSavePath.trim() ||
                     !editGameBackupPath.trim()
                   }
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {t('save')}
                 </button>
@@ -506,36 +741,41 @@ export function SaveDetail() {
         </div>
       )}
 
-      {showUpdateConfirmModal && selectedGame && updateTargetSaveId && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold text-red-400 mb-4">
-              {t('warning')}
-            </h3>
-            <p className="text-gray-300 mb-6">{t('overwriteWarning')}</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowUpdateConfirmModal(false);
-                  setUpdateTargetSaveId(null);
-                }}
-                className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                {t('cancel')}
-              </button>
-              <button
-                onClick={() => {
-                  setShowUpdateConfirmModal(false);
-                  handleConfirmUpdate();
-                }}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                {t('confirm')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={showUpdateConfirmModal}
+        title={t('warning')}
+        message={t('overwriteWarning')}
+        onConfirm={handleConfirmUpdate}
+        onCancel={() => {
+          setShowUpdateConfirmModal(false);
+          setUpdateTargetSaveId(null);
+        }}
+        variant="warning"
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirmModal}
+        title={t('delete')}
+        message={t('deleteConfirm')}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirmModal(false);
+          setDeleteTargetSaveId(null);
+        }}
+        variant="danger"
+      />
+
+      <ConfirmDialog
+        isOpen={showRestoreConfirmModal}
+        title={t('restore')}
+        message={t('restoreConfirm')}
+        onConfirm={handleConfirmRestore}
+        onCancel={() => {
+          setShowRestoreConfirmModal(false);
+          setRestoreTargetSave(null);
+        }}
+        variant="info"
+      />
     </div>
   );
 }
