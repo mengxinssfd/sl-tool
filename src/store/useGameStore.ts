@@ -7,23 +7,35 @@ export interface SaveData {
   createdAt: number;
   updatedAt: number;
   note: string;
+  backupFileName: string;
 }
 
 export interface Game {
   id: string;
   name: string;
   savePath: string;
+  backupPath: string;
   saves: SaveData[];
 }
 
 interface GameStore {
   games: Game[];
   selectedGameId: string | null;
-  addGame: (name: string, savePath: string) => void;
+  addGame: (name: string, savePath: string, backupPath?: string) => void;
   deleteGame: (id: string) => void;
-  updateGame: (id: string, name: string, savePath: string) => void;
+  updateGame: (
+    id: string,
+    name: string,
+    savePath: string,
+    backupPath: string,
+  ) => void;
   selectGame: (id: string | null) => void;
-  addSave: (gameId: string, name: string, note?: string) => void;
+  addSave: (
+    gameId: string,
+    name: string,
+    note?: string,
+    backupFileName?: string,
+  ) => void;
   deleteSave: (gameId: string, saveId: string) => void;
   updateSave: (
     gameId: string,
@@ -56,11 +68,12 @@ export const useGameStore = create<GameStore>((set) => ({
   games: loadFromStorage(),
   selectedGameId: null,
 
-  addGame: (name, savePath) => {
+  addGame: (name, savePath, backupPath = '') => {
     const newGame: Game = {
       id: Date.now().toString(),
       name,
       savePath,
+      backupPath,
       saves: [],
     };
     set((state) => {
@@ -82,10 +95,15 @@ export const useGameStore = create<GameStore>((set) => ({
     });
   },
 
-  updateGame: (id, name, savePath) => {
+  updateGame: (
+    id: string,
+    name: string,
+    savePath: string,
+    backupPath: string,
+  ) => {
     set((state) => {
       const newGames = state.games.map((game) =>
-        game.id === id ? { ...game, name, savePath } : game,
+        game.id === id ? { ...game, name, savePath, backupPath } : game,
       );
       saveToStorage(newGames);
       return { games: newGames };
@@ -96,13 +114,16 @@ export const useGameStore = create<GameStore>((set) => ({
     set({ selectedGameId: id });
   },
 
-  addSave: (gameId, name, note = '') => {
+  addSave: (gameId, name, note = '', backupFileName = '') => {
+    const timestamp = Date.now();
+    const fileName = backupFileName || `save_${timestamp}.bak`;
     const newSave: SaveData = {
-      id: Date.now().toString(),
+      id: timestamp.toString(),
       name,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
       note,
+      backupFileName: fileName,
     };
     set((state) => {
       const newGames = state.games.map((game) =>

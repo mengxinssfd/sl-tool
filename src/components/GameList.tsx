@@ -61,9 +61,6 @@ export function GameList({ onAddGame }: GameListProps) {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-semibold text-white">{game.name}</h3>
-                    <p className="text-sm text-gray-400 truncate mt-1">
-                      {game.savePath}
-                    </p>
                   </div>
                   <button
                     onClick={(e) => {

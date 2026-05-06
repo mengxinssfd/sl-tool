@@ -1,5 +1,11 @@
-import { app, BrowserWindow, dialog, IpcMainEvent } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import path from 'path';
+import {
+  addOpenDirectoryDialogListener,
+  addDeleteSaveFileListener,
+  addSaveBackupListener,
+  addRenameBackupListener,
+} from './listeners';
 
 let win: BrowserWindow | null = null;
 
@@ -17,23 +23,16 @@ function createWindow() {
     },
   });
   const url = process.env['VITE_DEV_SERVER_URL'];
-  win.webContents.ipc.on(
-    import.meta.env.VITE_SIGNAL_OPEN_DIRECTORY_DIALOG,
-    async (event: IpcMainEvent, channel: string) => {
-      const result = await dialog.showOpenDialog({
-        properties: ['openDirectory'],
-        title: '选择存档目录',
-      });
-      const path = result.filePaths[0] || null;
-      event.reply(channel, path);
-    },
-  );
   if (url) {
     win.loadURL(url);
     win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(__dirname, '../../dist/index.html'));
   }
+  addOpenDirectoryDialogListener(win.webContents.ipc);
+  addSaveBackupListener(win.webContents.ipc);
+  addDeleteSaveFileListener(win.webContents.ipc);
+  addRenameBackupListener(win.webContents.ipc);
 }
 
 app.whenReady().then(createWindow);

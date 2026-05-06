@@ -12,6 +12,7 @@ export interface TranslationKeys {
   deleteGameConfirm: string;
   saveManager: string;
   savePath: string;
+  backupPath: string;
   selectGame: string;
   selectGameHint: string;
   quickSave: string;
@@ -33,7 +34,25 @@ export interface TranslationKeys {
   new: string;
   updatedLabel: string;
   update: string;
+  copy: string;
   noOtherSaves: string;
   selectSourceSave: string;
   updatedFrom: string;
+  warning: string;
+  overwriteWarning: string;
+  confirm: string;
+  backupPathNotSet: string;
+  saveCreated: string;
+  saveCreateFailed: string;
+  deleteConfirm: string;
+  saveDeleted: string;
+  saveDeleteFailed: string;
+  saveUpdated: string;
+  saveUpdateFailed: string;
+  noBackupFile: string;
+  restoreConfirm: string;
+  saveRestored: string;
+  saveRestoreFailed: string;
+  saveCopied: string;
+  saveCopyFailed: string;
 }
