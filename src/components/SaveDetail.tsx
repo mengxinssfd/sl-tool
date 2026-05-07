@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import path from 'path';
 import { useGameStore, useSelectedGame, SaveData } from '../store/useGameStore';
 import { useText } from '../i18n';
 import { channel } from '@/channel';
@@ -172,11 +171,10 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       onToast('warning', t('noBackupFile'));
       return;
     }
-    const backupFolderPath = path.join(
+    const reason = await channel.openFolder([
       selectedGame.backupPath,
       save.backupFileName,
-    );
-    const reason = await channel.openFolder([backupFolderPath]);
+    ]);
     if (reason) {
       console.error('Failed to open backup folder:', reason);
       onToast('error', t('openFolderFailed'));
