@@ -1,5 +1,6 @@
-import { SaveData } from '../store/useGameStore';
-import { useText } from '../i18n';
+import { SaveData } from '@/store/useGameStore';
+import { useText } from '@/i18n';
+import { getRelativeTime } from '@/utils/date';
 
 interface SaveListProps {
   saves: SaveData[];
@@ -134,17 +135,21 @@ export function SaveList({
                       <h3 className="font-semibold text-[var(--color-text-primary)] text-lg">
                         {save.name}
                       </h3>
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mt-1 ${
-                          save.createdAt === save.updatedAt
-                            ? 'bg-gradient-to-r from-[var(--color-primary)]/20 to-[var(--color-secondary)]/20 text-[var(--color-primary-light)]'
-                            : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]'
-                        }`}
-                      >
-                        {save.createdAt === save.updatedAt
-                          ? t('new')
-                          : t('updatedLabel')}
-                      </span>
+                      {(() => {
+                        if (save.updatedAt === save.createdAt) return null;
+                        const relativeTime = getRelativeTime(save.updatedAt, {
+                          daysAgo: t('daysAgo'),
+                          hoursAgo: t('hoursAgo'),
+                          minutesAgo: t('minutesAgo'),
+                          justNow: t('justNow'),
+                        });
+                        if (!relativeTime) return null;
+                        return (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mt-1 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]">
+                            {relativeTime}
+                          </span>
+                        );
+                      })()}
                     </div>
                   </div>
                   {save.note && (

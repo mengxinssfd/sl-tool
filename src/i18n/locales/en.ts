@@ -90,4 +90,8 @@ export const enTranslation: TranslationKeys = {
   importConfigWarning:
     'Importing config will add games incrementally. Continue?',
   importConfigNoNewGames: 'No new game configurations to import',
+  daysAgo: 'Updated {{days}}d ago',
+  hoursAgo: 'Updated {{hours}}h ago',
+  minutesAgo: 'Updated {{minutes}}m ago',
+  justNow: 'Updated just now',
 };

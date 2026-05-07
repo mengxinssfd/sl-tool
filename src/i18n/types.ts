@@ -83,4 +83,8 @@ export interface TranslationKeys {
   importConfigFailed: string;
   importConfigWarning: string;
   importConfigNoNewGames: string;
+  daysAgo: string;
+  hoursAgo: string;
+  minutesAgo: string;
+  justNow: string;
 }

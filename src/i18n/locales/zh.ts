@@ -85,4 +85,8 @@ export const zhTranslation: TranslationKeys = {
   importConfigFailed: '配置导入失败',
   importConfigWarning: '导入配置将增量添加游戏，确定继续吗？',
   importConfigNoNewGames: '没有新的游戏配置可以导入',
+  daysAgo: '{{days}}天前更新',
+  hoursAgo: '{{hours}}小时前更新',
+  minutesAgo: '{{minutes}}分钟前更新',
+  justNow: '刚刚更新',
 };
