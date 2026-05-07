@@ -8,10 +8,10 @@ import {
 import { useText } from '../i18n';
 import { channel } from '@/channel';
 import { SaveList } from './SaveList';
-import { ConfirmDialog } from './ConfirmDialog';
-import { ToastType } from './Toast';
-import { AddSaveModal } from './AddSaveModal';
-import { EditGameModal } from './EditGameModal';
+import { ConfirmDialog } from '../components/ConfirmDialog';
+import { ToastType } from '../components/Toast';
+import { AddSaveModal } from '../components/AddSaveModal';
+import { EditGameModal } from '../components/EditGameModal';
 
 interface SaveDetailProps {
   onToast: (type: ToastType, message: string) => void;

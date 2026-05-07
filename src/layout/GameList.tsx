@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Game, useGameStore } from '../store/useGameStore';
 import { useText } from '../i18n';
-import { ConfirmDialog } from './ConfirmDialog';
-import { ToastType } from './Toast';
+import { ConfirmDialog } from '../components/ConfirmDialog';
+import { ToastType } from '../components/Toast';
 import { channel } from '../channel';
 
 interface GameListProps {

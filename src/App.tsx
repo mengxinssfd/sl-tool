@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { GameList } from './components/GameList';
-import { SaveDetail } from './components/SaveDetail';
+import { GameList } from './layout/GameList';
+import { SaveDetail } from './layout/SaveDetail';
 import { AddGameModal } from './components/AddGameModal';
 import { Toast, ToastType, ToastData } from './components/Toast';
 import { useText, changeLanguage, getCurrentLanguage } from './i18n';
