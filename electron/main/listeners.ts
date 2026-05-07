@@ -122,7 +122,7 @@ export function addRenameBackupListener(ipc: IpcMain) {
 
 export function addOpenFolderListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env['VITE_SIGNAL_OPEN_FOLDER'],
+    import.meta.env.VITE_SIGNAL_OPEN_FOLDER,
     async (event: IpcMainEvent, channel: string, paths: string[]) => {
       const p = path.join(...paths);
       if (!fs.existsSync(p)) {
