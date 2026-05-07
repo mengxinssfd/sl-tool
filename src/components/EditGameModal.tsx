@@ -88,7 +88,7 @@ export function EditGameModal({
   return (
     <Modal
       isOpen={isOpen}
-      title={`${t('edit')} ${t('saveManager')}`}
+      title={t('edit')}
       onClose={onClose}
       confirmText={t('save')}
       cancelText={t('cancel')}
@@ -98,13 +98,13 @@ export function EditGameModal({
     >
       <div>
         <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
-          {t('saveManager')}
+          {t('gameName')}
         </label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder={t('saveManager')}
+          placeholder={t('gameName')}
           className="w-full px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
           autoFocus
         />
