@@ -50,7 +50,21 @@ function createWindow() {
   addImportConfigListener(win.webContents.ipc);
 }
 
-app.whenReady().then(createWindow);
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.show();
+      win.focus();
+    }
+  });
+
+  app.whenReady().then(createWindow);
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -59,7 +73,11 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
+  const allWindows = BrowserWindow.getAllWindows();
+  if (allWindows.length === 0) {
     createWindow();
+  } else {
+    allWindows[0]!.show();
+    allWindows[0]!.focus();
   }
 });
