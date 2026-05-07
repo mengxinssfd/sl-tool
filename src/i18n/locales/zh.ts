@@ -76,4 +76,5 @@ export const zhTranslation: TranslationKeys = {
   getStarted: '开始使用',
   notSet: '未设置',
   gameDeleted: '游戏备份配置删除成功',
+  migrateBackupFailed: '备份迁移失败',
 };

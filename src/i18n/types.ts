@@ -74,4 +74,5 @@ export interface TranslationKeys {
   getStarted: string;
   notSet: string;
   gameDeleted: string;
+  migrateBackupFailed: string;
 }

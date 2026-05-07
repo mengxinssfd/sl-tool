@@ -192,14 +192,39 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
     }
   };
 
-  const handleEditGame = () => {
+  const handleEditGame = async () => {
     if (!selectedGame || !editGameName.trim() || !editGameSavePath.trim())
       return;
+
+    const oldBackupPath = selectedGame.backupPath;
+    const newBackupPath = editGameBackupPath.trim();
+    const backupFileNames = selectedGame.saves.map(
+      (save) => save.backupFileName,
+    );
+
+    if (
+      oldBackupPath &&
+      newBackupPath &&
+      oldBackupPath !== newBackupPath &&
+      backupFileNames.length > 0
+    ) {
+      const result = await channel.migrateBackups(
+        oldBackupPath,
+        newBackupPath,
+        backupFileNames,
+      );
+      if (result) {
+        console.error('Failed to migrate backups:', result);
+        onToast('error', t('migrateBackupFailed'));
+        return;
+      }
+    }
+
     updateGame(
       selectedGame.id,
       editGameName.trim(),
       editGameSavePath.trim(),
-      editGameBackupPath.trim(),
+      newBackupPath,
       editGameExecutablePath.trim(),
     );
     setShowEditGameModal(false);

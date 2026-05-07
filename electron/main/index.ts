@@ -8,6 +8,7 @@ import {
   addRenameBackupListener,
   addOpenFileDialogListener,
   addStartGameListener,
+  addMigrateBackupsListener,
 } from './listeners';
 
 let win: BrowserWindow | null = null;
@@ -42,6 +43,7 @@ function createWindow() {
   addRenameBackupListener(win.webContents.ipc);
   addOpenFileDialogListener(win.webContents.ipc);
   addStartGameListener(win.webContents.ipc);
+  addMigrateBackupsListener(win.webContents.ipc);
 }
 
 app.whenReady().then(createWindow);

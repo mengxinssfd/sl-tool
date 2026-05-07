@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_SIGNAL_OPEN_FILE_DIALOG: string;
   readonly VITE_SIGNAL_EXE_FILE: string;
   readonly VITE_APP_TITLE: string;
+  readonly VITE_SIGNAL_MIGRATE_BACKUPS: string;
 }
 
 interface ImportMeta {

@@ -80,4 +80,5 @@ export const enTranslation: TranslationKeys = {
   getStarted: 'Get Started',
   notSet: 'Not Set',
   gameDeleted: 'Game deleted successfully',
+  migrateBackupFailed: 'Failed to migrate backups',
 };

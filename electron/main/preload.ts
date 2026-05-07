@@ -96,6 +96,26 @@ const preload = {
       );
     });
   },
+  // 迁移备份文件
+  migrateBackups: async (
+    fromPath: string,
+    toPath: string,
+    backupFileNames: string[],
+  ) => {
+    return new Promise<void | string>((resolve) => {
+      const channel = `MigrateBackups:${Date.now()}`;
+      ipcRenderer.once(channel, (_e, result) => {
+        resolve(result);
+      });
+      ipcRenderer.send(
+        import.meta.env.VITE_SIGNAL_MIGRATE_BACKUPS,
+        channel,
+        fromPath,
+        toPath,
+        backupFileNames,
+      );
+    });
+  },
 };
 contextBridge.exposeInMainWorld(import.meta.env.VITE_API_KEY, preload);
 export type Preload = typeof preload;

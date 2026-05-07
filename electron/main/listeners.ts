@@ -161,3 +161,41 @@ export function addStartGameListener(ipc: IpcMain) {
     },
   );
 }
+
+export function addMigrateBackupsListener(ipc: IpcMain) {
+  ipc.on(
+    import.meta.env.VITE_SIGNAL_MIGRATE_BACKUPS,
+    async (
+      event,
+      channel: string,
+      fromPath: string,
+      toPath: string,
+      backupFileNames: string[],
+    ) => {
+      try {
+        if (!fs.existsSync(fromPath)) {
+          event.reply(channel, `${fromPath} unexist`);
+          return;
+        }
+
+        if (!fs.existsSync(toPath)) {
+          fs.mkdirSync(toPath, { recursive: true });
+        }
+
+        for (const fileName of backupFileNames) {
+          const srcPath = path.join(fromPath, fileName);
+          const destPath = path.join(toPath, fileName);
+
+          if (fs.existsSync(srcPath)) {
+            fs.renameSync(srcPath, destPath);
+          }
+        }
+
+        event.reply(channel);
+      } catch (error) {
+        console.error('Error migrating backups:', error);
+        event.reply(channel, String(error));
+      }
+    },
+  );
+}
