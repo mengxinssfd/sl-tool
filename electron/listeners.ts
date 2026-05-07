@@ -2,10 +2,11 @@ import { dialog, IpcMainEvent, IpcMain, shell } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import Signal from './signal';
 
 export function addOpenDirectoryDialogListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env.VITE_SIGNAL_OPEN_DIRECTORY_DIALOG,
+    Signal.OPEN_DIRECTORY_DIALOG,
     async (event: IpcMainEvent, channel: string) => {
       const result = await dialog.showOpenDialog({
         properties: ['openDirectory'],
@@ -19,7 +20,7 @@ export function addOpenDirectoryDialogListener(ipc: IpcMain) {
 
 export function addOpenFileDialogListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env.VITE_SIGNAL_OPEN_FILE_DIALOG,
+    Signal.OPEN_FILE_DIALOG,
     async (event: IpcMainEvent, channel: string) => {
       const result = await dialog.showOpenDialog({
         properties: ['openFile'],
@@ -37,7 +38,7 @@ export function addOpenFileDialogListener(ipc: IpcMain) {
 
 export function addSaveBackupListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env.VITE_SIGNAL_SAVE_BACKUP,
+    Signal.SAVE_BACKUP,
     async (event, channel: string, from: string[], to: string[]) => {
       const fromDirPath = path.join(...from);
       const toDirPath = path.join(...to);
@@ -77,7 +78,7 @@ export function addSaveBackupListener(ipc: IpcMain) {
 
 export function addDeleteSaveFileListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env.VITE_SIGNAL_DELETE_SAVE_FILE,
+    Signal.DELETE_SAVE_FILE,
     async (event, channel, deletePath: string[]) => {
       try {
         const backupDir = path.join(...deletePath);
@@ -99,7 +100,7 @@ export function addDeleteSaveFileListener(ipc: IpcMain) {
 
 export function addRenameBackupListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env.VITE_SIGNAL_RENAME_BACKUP,
+    Signal.RENAME_BACKUP,
     async (event, channel, from: string[], to: string[]) => {
       try {
         const fromPath = path.join(...from);
@@ -122,7 +123,7 @@ export function addRenameBackupListener(ipc: IpcMain) {
 
 export function addOpenFolderListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env.VITE_SIGNAL_OPEN_FOLDER,
+    Signal.OPEN_FOLDER,
     async (event: IpcMainEvent, channel: string, paths: string[]) => {
       const p = path.join(...paths);
       if (!fs.existsSync(p)) {
@@ -141,7 +142,7 @@ export function addOpenFolderListener(ipc: IpcMain) {
 
 export function addStartGameListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env.VITE_SIGNAL_EXE_FILE,
+    Signal.EXE_FILE,
     async (event: IpcMainEvent, channel: string, executablePath: string) => {
       if (!fs.existsSync(executablePath)) {
         event.reply(channel, `${executablePath} unexist`);
@@ -164,7 +165,7 @@ export function addStartGameListener(ipc: IpcMain) {
 
 export function addMigrateBackupsListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env.VITE_SIGNAL_MIGRATE_BACKUPS,
+    Signal.MIGRATE_BACKUPS,
     async (
       event,
       channel: string,
@@ -202,7 +203,7 @@ export function addMigrateBackupsListener(ipc: IpcMain) {
 
 export function addExportConfigListener(ipc: IpcMain) {
   ipc.on(
-    import.meta.env.VITE_SIGNAL_EXPORT_CONFIG,
+    Signal.EXPORT_CONFIG,
     async (event: IpcMainEvent, channel: string, configData: string) => {
       const result = await dialog.showSaveDialog({
         title: '导出配置文件',
@@ -230,32 +231,29 @@ export function addExportConfigListener(ipc: IpcMain) {
 }
 
 export function addImportConfigListener(ipc: IpcMain) {
-  ipc.on(
-    import.meta.env.VITE_SIGNAL_IMPORT_CONFIG,
-    async (event: IpcMainEvent, channel: string) => {
-      const result = await dialog.showOpenDialog({
-        title: '导入配置文件',
-        properties: ['openFile'],
-        filters: [
-          { name: 'JSON 文件', extensions: ['json'] },
-          { name: '所有文件', extensions: ['*'] },
-        ],
-      });
-      if (result.canceled || result.filePaths.length === 0) {
-        event.reply(channel, null);
-        return;
-      }
+  ipc.on(Signal.IMPORT_CONFIG, async (event: IpcMainEvent, channel: string) => {
+    const result = await dialog.showOpenDialog({
+      title: '导入配置文件',
+      properties: ['openFile'],
+      filters: [
+        { name: 'JSON 文件', extensions: ['json'] },
+        { name: '所有文件', extensions: ['*'] },
+      ],
+    });
+    if (result.canceled || result.filePaths.length === 0) {
+      event.reply(channel, null);
+      return;
+    }
 
-      try {
-        const configData = fs.readFileSync(
-          result.filePaths[0] as string,
-          'utf-8',
-        );
-        event.reply(channel, configData);
-      } catch (error) {
-        console.error('Error importing config:', error);
-        event.reply(channel, String(error));
-      }
-    },
-  );
+    try {
+      const configData = fs.readFileSync(
+        result.filePaths[0] as string,
+        'utf-8',
+      );
+      event.reply(channel, configData);
+    } catch (error) {
+      console.error('Error importing config:', error);
+      event.reply(channel, String(error));
+    }
+  });
 }
