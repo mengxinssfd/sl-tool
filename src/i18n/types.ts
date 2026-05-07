@@ -75,4 +75,12 @@ export interface TranslationKeys {
   notSet: string;
   gameDeleted: string;
   migrateBackupFailed: string;
+  exportConfig: string;
+  exportConfigSuccess: string;
+  exportConfigFailed: string;
+  importConfig: string;
+  importConfigSuccess: string;
+  importConfigFailed: string;
+  importConfigWarning: string;
+  importConfigNoNewGames: string;
 }

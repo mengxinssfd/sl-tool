@@ -77,4 +77,12 @@ export const zhTranslation: TranslationKeys = {
   notSet: '未设置',
   gameDeleted: '游戏备份配置删除成功',
   migrateBackupFailed: '备份迁移失败',
+  exportConfig: '导出配置',
+  exportConfigSuccess: '配置导出成功',
+  exportConfigFailed: '配置导出失败',
+  importConfig: '导入配置',
+  importConfigSuccess: '配置导入成功',
+  importConfigFailed: '配置导入失败',
+  importConfigWarning: '导入配置将增量添加游戏，确定继续吗？',
+  importConfigNoNewGames: '没有新的游戏配置可以导入',
 };

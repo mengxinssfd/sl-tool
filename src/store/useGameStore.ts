@@ -28,6 +28,7 @@ interface GameStore {
     backupPath?: string,
     gameExecutablePath?: string,
   ) => void;
+  appendGame: (games: Game[]) => void;
   deleteGame: (id: string) => void;
   updateGame: (
     id: string,
@@ -90,7 +91,13 @@ export const useGameStore = create<GameStore>((set) => ({
       return { games: newGames };
     });
   },
-
+  appendGame: (games) => {
+    set((state) => {
+      const newGames = [...state.games, ...games.map((g) => copyGame(g))];
+      saveToStorage(newGames);
+      return { games: newGames };
+    });
+  },
   deleteGame: (id) => {
     set((state) => {
       const newGames = state.games.filter((game) => game.id !== id);
@@ -183,6 +190,27 @@ export const useGameStore = create<GameStore>((set) => ({
     saveToStorage(games);
   },
 }));
+
+function copyGame(game: Game): Game {
+  return {
+    id: game.id,
+    name: game.name,
+    backupPath: game.backupPath,
+    savePath: game.savePath,
+    gameExecutablePath: game.gameExecutablePath,
+    saves: game.saves.map((save) => copySave(save)),
+  };
+}
+function copySave(save: SaveData): SaveData {
+  return {
+    id: save.id,
+    name: save.name,
+    note: save.note,
+    backupFileName: save.backupFileName,
+    updatedAt: save.updatedAt,
+    createdAt: save.createdAt,
+  };
+}
 
 export const useSelectedGame = () => {
   const { games, selectedGameId } = useGameStore();

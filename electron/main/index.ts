@@ -9,6 +9,8 @@ import {
   addOpenFileDialogListener,
   addStartGameListener,
   addMigrateBackupsListener,
+  addExportConfigListener,
+  addImportConfigListener,
 } from './listeners';
 
 let win: BrowserWindow | null = null;
@@ -44,6 +46,8 @@ function createWindow() {
   addOpenFileDialogListener(win.webContents.ipc);
   addStartGameListener(win.webContents.ipc);
   addMigrateBackupsListener(win.webContents.ipc);
+  addExportConfigListener(win.webContents.ipc);
+  addImportConfigListener(win.webContents.ipc);
 }
 
 app.whenReady().then(createWindow);

@@ -81,4 +81,13 @@ export const enTranslation: TranslationKeys = {
   notSet: 'Not Set',
   gameDeleted: 'Game deleted successfully',
   migrateBackupFailed: 'Failed to migrate backups',
+  exportConfig: 'Export Config',
+  exportConfigSuccess: 'Config exported successfully',
+  exportConfigFailed: 'Failed to export config',
+  importConfig: 'Import Config',
+  importConfigSuccess: 'Config imported successfully',
+  importConfigFailed: 'Failed to import config',
+  importConfigWarning:
+    'Importing config will add games incrementally. Continue?',
+  importConfigNoNewGames: 'No new game configurations to import',
 };

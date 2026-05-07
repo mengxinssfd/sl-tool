@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useGameStore } from '../store/useGameStore';
+import { Game, useGameStore } from '../store/useGameStore';
 import { useText } from '../i18n';
 import { ConfirmDialog } from './ConfirmDialog';
 import { ToastType } from './Toast';
+import { channel } from '../channel';
 
 interface GameListProps {
   onAddGame: () => void;
@@ -11,11 +12,13 @@ interface GameListProps {
 
 export function GameList({ onAddGame, onToast }: GameListProps) {
   const t = useText();
-  const { games, selectedGameId, selectGame, deleteGame } = useGameStore();
+  const { games, selectedGameId, selectGame, deleteGame, appendGame } =
+    useGameStore();
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [deleteTargetGameId, setDeleteTargetGameId] = useState<string | null>(
     null,
   );
+  const [showImportConfirmModal, setShowImportConfirmModal] = useState(false);
 
   const handleDelete = (id: string) => {
     setDeleteTargetGameId(id);
@@ -28,6 +31,54 @@ export function GameList({ onAddGame, onToast }: GameListProps) {
     onToast('success', t('gameDeleted'));
     setShowDeleteConfirmModal(false);
     setDeleteTargetGameId(null);
+  };
+
+  const handleExportConfig = async () => {
+    try {
+      const configData = JSON.stringify(games, null, 2);
+      const result = await channel.exportConfig(configData);
+      if (result) {
+        onToast('error', t('exportConfigFailed'));
+      } else {
+        onToast('success', t('exportConfigSuccess'));
+      }
+    } catch (error) {
+      console.error('Error exporting config:', error);
+      onToast('error', t('exportConfigFailed'));
+    }
+  };
+
+  const handleImportConfig = () => {
+    setShowImportConfirmModal(true);
+  };
+
+  const handleConfirmImport = async () => {
+    try {
+      const configData = await channel.importConfig();
+      if (configData === null) {
+        setShowImportConfirmModal(false);
+        return;
+      }
+      const importedGames = JSON.parse(configData);
+      const existingIds = new Set(games.map((g) => g.id));
+      const newGames = importedGames.filter(
+        (game: Game) => !existingIds.has(game.id),
+      );
+
+      if (newGames.length === 0) {
+        onToast('info', t('importConfigNoNewGames'));
+        setShowImportConfirmModal(false);
+        return;
+      }
+      appendGame(newGames);
+
+      onToast('success', `${t('importConfigSuccess')} (${newGames.length})`);
+    } catch (error) {
+      console.error('Error importing config:', error);
+      onToast('error', t('importConfigFailed'));
+    } finally {
+      setShowImportConfirmModal(false);
+    }
   };
 
   return (
@@ -59,25 +110,67 @@ export function GameList({ onAddGame, onToast }: GameListProps) {
               </p>
             </div>
           </div>
-          <button
-            onClick={onAddGame}
-            className="w-11 h-11 px-3 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] text-sm font-medium flex items-center justify-center hover:-translate-y-0.5 active:translate-y-0"
-            title={t('addGame')}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="flex gap-2">
+            {games.length > 0 && (
+              <button
+                onClick={handleExportConfig}
+                className="w-11 h-11 px-3 py-2.5 bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] rounded-xl hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white transition-all duration-[var(--transition-normal)] text-sm font-medium flex items-center justify-center"
+                title={t('exportConfig')}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={handleImportConfig}
+              className="w-11 h-11 px-3 py-2.5 bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] rounded-xl hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white transition-all duration-[var(--transition-normal)] text-sm font-medium flex items-center justify-center"
+              title={t('importConfig')}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-          </button>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={onAddGame}
+              className="w-11 h-11 px-3 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] text-sm font-medium flex items-center justify-center hover:-translate-y-0.5 active:translate-y-0"
+              title={t('addGame')}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -226,6 +319,17 @@ export function GameList({ onAddGame, onToast }: GameListProps) {
           setDeleteTargetGameId(null);
         }}
         variant="danger"
+      />
+
+      <ConfirmDialog
+        isOpen={showImportConfirmModal}
+        title={t('importConfig')}
+        message={t('importConfigWarning')}
+        onConfirm={handleConfirmImport}
+        onCancel={() => {
+          setShowImportConfirmModal(false);
+        }}
+        variant="warning"
       />
     </div>
   );

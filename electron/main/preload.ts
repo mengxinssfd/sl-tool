@@ -116,6 +116,30 @@ const preload = {
       );
     });
   },
+  // 导出配置
+  exportConfig: async (configData: string) => {
+    return new Promise<void | string>((resolve) => {
+      const channel = `ExportConfig:${Date.now()}`;
+      ipcRenderer.once(channel, (_e, result) => {
+        resolve(result);
+      });
+      ipcRenderer.send(
+        import.meta.env.VITE_SIGNAL_EXPORT_CONFIG,
+        channel,
+        configData,
+      );
+    });
+  },
+  // 导入配置
+  importConfig: async () => {
+    return new Promise<string | null>((resolve) => {
+      const channel = `ImportConfig:${Date.now()}`;
+      ipcRenderer.once(channel, (_e, result) => {
+        resolve(result);
+      });
+      ipcRenderer.send(import.meta.env.VITE_SIGNAL_IMPORT_CONFIG, channel);
+    });
+  },
 };
 contextBridge.exposeInMainWorld(import.meta.env.VITE_API_KEY, preload);
 export type Preload = typeof preload;

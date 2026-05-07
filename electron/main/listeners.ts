@@ -199,3 +199,63 @@ export function addMigrateBackupsListener(ipc: IpcMain) {
     },
   );
 }
+
+export function addExportConfigListener(ipc: IpcMain) {
+  ipc.on(
+    import.meta.env.VITE_SIGNAL_EXPORT_CONFIG,
+    async (event: IpcMainEvent, channel: string, configData: string) => {
+      const result = await dialog.showSaveDialog({
+        title: '导出配置文件',
+        filters: [
+          { name: 'JSON 文件', extensions: ['json'] },
+          { name: '所有文件', extensions: ['*'] },
+        ],
+        defaultPath: `game-save-config-${Date.now()}.json`,
+      });
+
+      if (result.canceled) {
+        event.reply(channel, null);
+        return;
+      }
+
+      try {
+        fs.writeFileSync(result.filePath!, configData, 'utf-8');
+        event.reply(channel, null);
+      } catch (error) {
+        console.error('Error exporting config:', error);
+        event.reply(channel, String(error));
+      }
+    },
+  );
+}
+
+export function addImportConfigListener(ipc: IpcMain) {
+  ipc.on(
+    import.meta.env.VITE_SIGNAL_IMPORT_CONFIG,
+    async (event: IpcMainEvent, channel: string) => {
+      const result = await dialog.showOpenDialog({
+        title: '导入配置文件',
+        properties: ['openFile'],
+        filters: [
+          { name: 'JSON 文件', extensions: ['json'] },
+          { name: '所有文件', extensions: ['*'] },
+        ],
+      });
+      if (result.canceled || result.filePaths.length === 0) {
+        event.reply(channel, null);
+        return;
+      }
+
+      try {
+        const configData = fs.readFileSync(
+          result.filePaths[0] as string,
+          'utf-8',
+        );
+        event.reply(channel, configData);
+      } catch (error) {
+        console.error('Error importing config:', error);
+        event.reply(channel, String(error));
+      }
+    },
+  );
+}
