@@ -23,7 +23,6 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
   const { addSave, deleteSave, updateSave, updateGame } = useGameStore();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditGameModal, setShowEditGameModal] = useState(false);
-  const [editingSave, setEditingSave] = useState<SaveData | null>(null);
   const [showUpdateConfirmModal, setShowUpdateConfirmModal] = useState(false);
   const [updateTargetSaveId, setUpdateTargetSaveId] = useState<string | null>(
     null,
@@ -109,7 +108,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
     setDeleteTargetSaveId(null);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = (editingSave: SaveData) => {
     if (!editingSave || !selectedGame) return;
     const originSave = selectedGame.saves.find((s) => s.id === editingSave.id);
     if (!originSave) return;
@@ -120,7 +119,6 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       banUpdate: editingSave.banUpdate,
     });
     updateSave(selectedGame.id, editingSave.id, newSaveData);
-    setEditingSave(null);
     if (editingSave.name !== originSave.name) {
       channel.renameBackup(
         [selectedGame.backupPath, originSave.backupFileName],
@@ -515,7 +513,6 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
         <div className="max-w-5xl mx-auto">
           <SaveList
             saves={selectedGame.saves}
-            editingSave={editingSave}
             formatDate={formatDate}
             onDelete={handleDeleteSave}
             onSaveEdit={handleSaveEdit}
@@ -523,8 +520,6 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
             onRestore={(save) => handleRestoreSave(save)}
             onCopy={(save) => handleCopySave(save)}
             onOpenFolder={(save) => handleOpenBackupFolder(save)}
-            onEdit={setEditingSave}
-            setEditingSave={setEditingSave}
           />
         </div>
       </div>
