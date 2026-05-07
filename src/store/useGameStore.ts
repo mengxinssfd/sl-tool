@@ -173,9 +173,7 @@ export const useGameStore = create<GameStore>((set) => ({
           ? {
               ...game,
               saves: game.saves.map((save) =>
-                save.id === saveId
-                  ? { ...save, ...updates, updatedAt: Date.now() }
-                  : save,
+                save.id === saveId ? { ...save, ...updates } : save,
               ),
             }
           : game,
