@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { useGameStore, useSelectedGame, SaveData } from '../store/useGameStore';
+import {
+  useGameStore,
+  useSelectedGame,
+  SaveData,
+  getUpdatedSaveData,
+} from '../store/useGameStore';
 import { useText } from '../i18n';
 import { channel } from '@/channel';
 import { SaveList } from './SaveList';
@@ -56,21 +61,18 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       return;
     }
 
-    const backupFileName = getBackupFileName(newSaveName);
+    const newSaveData = addSave(
+      selectedGame.id,
+      newSaveName.trim(),
+      newSaveNote.trim(),
+    );
 
     const reason = await channel.saveBackup(
       [selectedGame.savePath],
-      [selectedGame.backupPath, backupFileName],
+      [selectedGame.backupPath, newSaveData.backupFileName],
     );
 
     if (!reason) {
-      addSave(
-        selectedGame.id,
-        newSaveName.trim(),
-        newSaveNote.trim(),
-        backupFileName,
-        newSaveBanUpdate,
-      );
       setNewSaveName('');
       setNewSaveNote('');
       setNewSaveBanUpdate(false);
@@ -120,21 +122,18 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
     if (!editingSave || !selectedGame) return;
     const originSave = selectedGame.saves.find((s) => s.id === editingSave.id);
     if (!originSave) return;
-    const newBackupFileName = getBackupFileName(
-      editingSave.name,
-      editingSave.createdAt,
-    );
-    updateSave(selectedGame.id, editingSave.id, {
+    const newSaveData = getUpdatedSaveData({
+      ...originSave,
       name: editingSave.name,
       note: editingSave.note,
-      backupFileName: newBackupFileName,
       banUpdate: editingSave.banUpdate,
     });
+    updateSave(selectedGame.id, editingSave.id, newSaveData);
     setEditingSave(null);
     if (editingSave.name !== originSave.name) {
       channel.renameBackup(
         [selectedGame.backupPath, originSave.backupFileName],
-        [selectedGame.backupPath, newBackupFileName],
+        [selectedGame.backupPath, newSaveData.backupFileName],
       );
     }
   };
@@ -313,28 +312,24 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       return;
     }
     const name = `${save.name} (${t('copy')})`;
-    const newBackupFileName = getBackupFileName(name);
-
+    const newSaveData = addSave(
+      selectedGame.id,
+      name,
+      save.note,
+      save.banUpdate,
+    );
     const reason = await channel.saveBackup(
       [selectedGame.backupPath, save.backupFileName],
-      [selectedGame.backupPath, newBackupFileName],
+      [selectedGame.backupPath, newSaveData.backupFileName],
     );
 
     if (!reason) {
-      addSave(selectedGame.id, name, save.note, newBackupFileName);
       onToast('success', t('saveCopied'));
     } else {
       console.error('saveCopyFailed', reason);
       onToast('error', t('saveCopyFailed'));
     }
   };
-
-  function getBackupFileName(
-    backupName: string,
-    timestamp = Date.now(),
-  ): string {
-    return `save_${backupName.trim()}_${timestamp}`;
-  }
 
   if (!selectedGame) {
     return (

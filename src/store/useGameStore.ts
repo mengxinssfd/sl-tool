@@ -43,9 +43,8 @@ interface GameStore {
     gameId: string,
     name: string,
     note?: string,
-    backupFileName?: string,
     banUpdate?: boolean,
-  ) => void;
+  ) => SaveData;
   deleteSave: (gameId: string, saveId: string) => void;
   updateSave: (
     gameId: string,
@@ -80,7 +79,7 @@ export const useGameStore = create<GameStore>((set) => ({
 
   addGame: (name, savePath, backupPath = '', gameExecutablePath = '') => {
     const newGame: Game = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name,
       savePath,
       backupPath,
@@ -134,24 +133,8 @@ export const useGameStore = create<GameStore>((set) => ({
     set({ selectedGameId: id });
   },
 
-  addSave: (
-    gameId,
-    name,
-    note = '',
-    backupFileName = '',
-    banUpdate = false,
-  ) => {
-    const timestamp = Date.now();
-    const fileName = backupFileName || `save_${timestamp}.bak`;
-    const newSave: SaveData = {
-      id: timestamp.toString(),
-      name,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      note,
-      backupFileName: fileName,
-      banUpdate,
-    };
+  addSave: (gameId, name, note = '', banUpdate = false) => {
+    const newSave = createSaveData(name, note, banUpdate);
     set((state) => {
       const newGames = state.games.map((game) =>
         game.id === gameId
@@ -161,6 +144,7 @@ export const useGameStore = create<GameStore>((set) => ({
       saveToStorage(newGames);
       return { games: newGames };
     });
+    return newSave;
   },
 
   deleteSave: (gameId, saveId) => {
@@ -218,6 +202,35 @@ function copySave(save: SaveData): SaveData {
     createdAt: save.createdAt,
     banUpdate: save.banUpdate,
   };
+}
+
+function createSaveData(
+  name: string,
+  note: string,
+  banUpdate: boolean,
+): SaveData {
+  const timestamp = Date.now();
+  const id = crypto.randomUUID();
+  return {
+    id,
+    name,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    note,
+    backupFileName: getBackupFileName(name, id),
+    banUpdate,
+  };
+}
+
+export function getUpdatedSaveData(data: SaveData): SaveData {
+  return {
+    ...data,
+    backupFileName: getBackupFileName(data.name, data.id),
+  };
+}
+
+function getBackupFileName(name: string, id: string): string {
+  return `save_${name.trim()}_${id}`;
 }
 
 export const useSelectedGame = () => {

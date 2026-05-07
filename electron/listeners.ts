@@ -215,13 +215,13 @@ export function addExportConfigListener(ipc: IpcMain) {
       });
 
       if (result.canceled) {
-        event.reply(channel, null);
+        event.reply(channel, 'canceled');
         return;
       }
 
       try {
         fs.writeFileSync(result.filePath!, configData, 'utf-8');
-        event.reply(channel, null);
+        event.reply(channel);
       } catch (error) {
         console.error('Error exporting config:', error);
         event.reply(channel, String(error));
