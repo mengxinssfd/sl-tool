@@ -36,9 +36,9 @@ export function Modal({
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-1000 backdrop-blur-md animate-fadeIn p-4">
       <div
-        className={`bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-card)] rounded-2xl p-8 w-full min-w-[320px] ${sizeClasses[size]} shadow-[var(--shadow-xl)] animate-scaleIn border border-[var(--color-border)] glass max-h-[90vh] overflow-y-auto`}
+        className={`bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-card)] rounded-2xl w-full min-w-[320px] ${sizeClasses[size]} shadow-[var(--shadow-xl)] animate-scaleIn border border-[var(--color-border)] glass max-h-[90vh] flex flex-col`}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0">
           <h3 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-3">
             {icon && (
               <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-xl flex items-center justify-center shadow-[var(--shadow-glow)]">
@@ -66,7 +66,7 @@ export function Modal({
             </svg>
           </button>
         </div>
-        <div className="space-y-5">
+        <div className="px-6 pb-6 space-y-5 overflow-y-auto flex-1">
           {children}
           {(onConfirm || cancelText) && (
             <div className="flex gap-3 pt-2">
