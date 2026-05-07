@@ -10,6 +10,8 @@ import { channel } from '@/channel';
 import { SaveList } from './SaveList';
 import { ConfirmDialog } from './ConfirmDialog';
 import { ToastType } from './Toast';
+import { AddSaveModal } from './AddSaveModal';
+import { EditGameModal } from './EditGameModal';
 
 interface SaveDetailProps {
   onToast: (type: ToastType, message: string) => void;
@@ -22,13 +24,6 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditGameModal, setShowEditGameModal] = useState(false);
   const [editingSave, setEditingSave] = useState<SaveData | null>(null);
-  const [newSaveName, setNewSaveName] = useState('');
-  const [newSaveNote, setNewSaveNote] = useState('');
-  const [newSaveBanUpdate, setNewSaveBanUpdate] = useState(false);
-  const [editGameName, setEditGameName] = useState('');
-  const [editGameSavePath, setEditGameSavePath] = useState('');
-  const [editGameBackupPath, setEditGameBackupPath] = useState('');
-  const [editGameExecutablePath, setEditGameExecutablePath] = useState('');
   const [showUpdateConfirmModal, setShowUpdateConfirmModal] = useState(false);
   const [updateTargetSaveId, setUpdateTargetSaveId] = useState<string | null>(
     null,
@@ -53,19 +48,19 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
     });
   };
 
-  const handleAddSave = async () => {
-    if (!newSaveName.trim() || !selectedGame) return;
+  const handleAddSave = async (
+    name: string,
+    note: string,
+    banUpdate: boolean,
+  ) => {
+    if (!name.trim() || !selectedGame) return;
 
     if (!selectedGame.backupPath) {
       onToast('warning', t('backupPathNotSet'));
       return;
     }
 
-    const newSaveData = addSave(
-      selectedGame.id,
-      newSaveName.trim(),
-      newSaveNote.trim(),
-    );
+    const newSaveData = addSave(selectedGame.id, name, note, banUpdate);
 
     const reason = await channel.saveBackup(
       [selectedGame.savePath],
@@ -73,10 +68,6 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
     );
 
     if (!reason) {
-      setNewSaveName('');
-      setNewSaveNote('');
-      setNewSaveBanUpdate(false);
-      setShowAddModal(false);
       onToast('success', t('saveCreated'));
     } else {
       console.error('saveCreateFailed', reason);
@@ -138,13 +129,39 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
     }
   };
 
-  const handleOpenEditGameModal = () => {
-    if (!selectedGame) return;
-    setEditGameName(selectedGame.name);
-    setEditGameSavePath(selectedGame.savePath);
-    setEditGameBackupPath(selectedGame.backupPath || '');
-    setEditGameExecutablePath(selectedGame.gameExecutablePath || '');
-    setShowEditGameModal(true);
+  const handleEditGame = async (
+    name: string,
+    savePath: string,
+    backupPath: string,
+    executablePath: string,
+  ) => {
+    if (!selectedGame || !name.trim() || !savePath.trim()) return;
+
+    const oldBackupPath = selectedGame.backupPath;
+    const newBackupPath = backupPath;
+    const backupFileNames = selectedGame.saves.map(
+      (save) => save.backupFileName,
+    );
+
+    if (
+      oldBackupPath &&
+      newBackupPath &&
+      oldBackupPath !== newBackupPath &&
+      backupFileNames.length > 0
+    ) {
+      const result = await channel.migrateBackups(
+        oldBackupPath,
+        newBackupPath,
+        backupFileNames,
+      );
+      if (result) {
+        console.error('Failed to migrate backups:', result);
+        onToast('error', t('migrateBackupFailed'));
+        return;
+      }
+    }
+
+    updateGame(selectedGame.id, name, savePath, newBackupPath, executablePath);
   };
 
   const handleStartGame = async () => {
@@ -191,44 +208,6 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       console.error('Failed to open backup folder:', reason);
       onToast('error', t('openFolderFailed'));
     }
-  };
-
-  const handleEditGame = async () => {
-    if (!selectedGame || !editGameName.trim() || !editGameSavePath.trim())
-      return;
-
-    const oldBackupPath = selectedGame.backupPath;
-    const newBackupPath = editGameBackupPath.trim();
-    const backupFileNames = selectedGame.saves.map(
-      (save) => save.backupFileName,
-    );
-
-    if (
-      oldBackupPath &&
-      newBackupPath &&
-      oldBackupPath !== newBackupPath &&
-      backupFileNames.length > 0
-    ) {
-      const result = await channel.migrateBackups(
-        oldBackupPath,
-        newBackupPath,
-        backupFileNames,
-      );
-      if (result) {
-        console.error('Failed to migrate backups:', result);
-        onToast('error', t('migrateBackupFailed'));
-        return;
-      }
-    }
-
-    updateGame(
-      selectedGame.id,
-      editGameName.trim(),
-      editGameSavePath.trim(),
-      newBackupPath,
-      editGameExecutablePath.trim(),
-    );
-    setShowEditGameModal(false);
   };
 
   const handleUpdateSave = (targetSaveId: string) => {
@@ -464,7 +443,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
           </div>
           <div className="flex items-center gap-2 ml-6">
             <button
-              onClick={handleOpenEditGameModal}
+              onClick={() => setShowEditGameModal(true)}
               className="w-11 h-11 px-3 py-2.5 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)] font-medium flex items-center justify-center border border-transparent hover:border-[var(--color-border)]"
               title={t('edit')}
             >
@@ -550,301 +529,18 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
         </div>
       </div>
 
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-md p-4">
-          <div className="bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-card)] rounded-2xl p-8 w-full max-w-[50vw] min-w-[320px] shadow-[var(--shadow-xl)] animate-scaleIn border border-[var(--color-border)] glass max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-xl flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                </div>
-                {t('newSave')}
-              </h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-2 hover:bg-[var(--color-bg-tertiary)] rounded-lg transition-colors"
-              >
-                <svg
-                  className="w-5 h-5 text-[var(--color-text-muted)]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-5">
-              <div>
-                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
-                  {t('saveName')}
-                </label>
-                <input
-                  type="text"
-                  value={newSaveName}
-                  onChange={(e) => setNewSaveName(e.target.value)}
-                  placeholder={t('saveName')}
-                  className="w-full px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
-                  autoFocus
-                />
-              </div>
-              <div>
-                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
-                  {t('note')} ({t('cancel')})
-                </label>
-                <textarea
-                  value={newSaveNote}
-                  onChange={(e) => setNewSaveNote(e.target.value)}
-                  placeholder={t('notePlaceholder')}
-                  className="w-full px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)] resize-none"
-                  rows={3}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[var(--color-text-secondary)] text-sm font-medium">
-                  {t('banUpdate')}
-                </span>
-                <button
-                  onClick={() => setNewSaveBanUpdate(!newSaveBanUpdate)}
-                  className={`relative w-12 h-6 rounded-full transition-all duration-[var(--transition-normal)] ${
-                    newSaveBanUpdate
-                      ? 'bg-gradient-to-r from-[var(--color-success)] to-[var(--color-success-hover)]'
-                      : 'bg-[var(--color-bg-tertiary)]'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-[var(--transition-normal)] ${
-                      newSaveBanUpdate ? 'left-7' : 'left-1'
-                    }`}
-                  />
-                </button>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)] font-medium"
-                >
-                  {t('cancel')}
-                </button>
-                <button
-                  onClick={handleAddSave}
-                  disabled={!newSaveName.trim()}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t('create')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddSaveModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onConfirm={handleAddSave}
+      />
 
-      {showEditGameModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-md p-4">
-          <div className="bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-card)] rounded-2xl p-8 w-full max-w-[50vw] min-w-[320px] shadow-[var(--shadow-xl)] animate-scaleIn border border-[var(--color-border)] glass max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-info)] to-[var(--color-info-light)] rounded-xl flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                </div>
-                {t('edit')} {t('saveManager')}
-              </h3>
-              <button
-                onClick={() => setShowEditGameModal(false)}
-                className="p-2 hover:bg-[var(--color-bg-tertiary)] rounded-lg transition-colors"
-              >
-                <svg
-                  className="w-5 h-5 text-[var(--color-text-muted)]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-5">
-              <div>
-                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
-                  {t('saveManager')}
-                </label>
-                <input
-                  type="text"
-                  value={editGameName}
-                  onChange={(e) => setEditGameName(e.target.value)}
-                  placeholder={t('saveManager')}
-                  className="w-full px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
-                  autoFocus
-                />
-              </div>
-              <div>
-                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
-                  {t('savePath')}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={editGameSavePath}
-                    onChange={(e) => setEditGameSavePath(e.target.value)}
-                    placeholder={t('savePath')}
-                    className="flex-1 px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
-                  />
-                  <button
-                    onClick={async () => {
-                      const path = await channel.openDirectoryDialog();
-                      if (path) {
-                        setEditGameSavePath(path);
-                      }
-                    }}
-                    className="px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)]"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
-                  {t('backupPath')}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={editGameBackupPath}
-                    onChange={(e) => setEditGameBackupPath(e.target.value)}
-                    placeholder={t('backupPath')}
-                    className="flex-1 px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
-                  />
-                  <button
-                    onClick={async () => {
-                      const path = await channel.openDirectoryDialog();
-                      if (path) {
-                        setEditGameBackupPath(path);
-                      }
-                    }}
-                    className="px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)]"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-[var(--color-text-secondary)] text-sm font-medium mb-2">
-                  {t('gameExecutablePath')}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={editGameExecutablePath}
-                    onChange={(e) => setEditGameExecutablePath(e.target.value)}
-                    placeholder={t('selectGameExecutablePath')}
-                    className="flex-1 px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)]"
-                  />
-                  <button
-                    onClick={async () => {
-                      const filePath = await channel.openFileDialog();
-                      if (filePath) {
-                        setEditGameExecutablePath(filePath);
-                      }
-                    }}
-                    className="px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)]"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => setShowEditGameModal(false)}
-                  className="flex-1 px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)] font-medium"
-                >
-                  {t('cancel')}
-                </button>
-                <button
-                  onClick={handleEditGame}
-                  disabled={
-                    !editGameName.trim() ||
-                    !editGameSavePath.trim() ||
-                    !editGameBackupPath.trim()
-                  }
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t('save')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <EditGameModal
+        isOpen={showEditGameModal}
+        onClose={() => setShowEditGameModal(false)}
+        game={selectedGame}
+        onConfirm={handleEditGame}
+      />
 
       <ConfirmDialog
         isOpen={showUpdateConfirmModal}
