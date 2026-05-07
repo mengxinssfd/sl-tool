@@ -1,6 +1,7 @@
 import { SaveData } from '@/store/useGameStore';
 import { useText } from '@/i18n';
 import { getRelativeTime } from '@/utils/date';
+import { ActionMenu } from '@/components/ActionMenu';
 
 interface SaveListItemProps {
   save: SaveData;
@@ -41,7 +42,7 @@ export function SaveListItem({
     <div
       key={save.id}
       className="group relative bg-gradient-to-br from-[var(--color-bg-card)] to-[var(--color-bg-secondary)] rounded-2xl p-5 transition-all duration-[var(--transition-normal)] hover:shadow-[var(--shadow-lg)] border border-[var(--color-border)] hover:border-[var(--color-border-hover)] animate-slideIn hover-lift cursor-pointer"
-      style={{ animationDelay: `${index * 50}ms` }}
+      style={{ animationDelay: `${index * 50}ms`, zIndex: 10 - index }}
     >
       <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0">
@@ -113,122 +114,128 @@ export function SaveListItem({
           </div>
         </div>
         <div className="flex items-center gap-2 ml-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--transition-normal)]">
-          <button
-            onClick={() => onEdit(save)}
-            className="p-2.5 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-fast)]"
-            title={t('edit')}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
-            </svg>
-          </button>
-          <button
-            onClick={() => onCopy(save)}
-            className="p-2.5 bg-gradient-to-br from-[var(--color-accent)]/20 to-[var(--color-secondary)]/10 text-[var(--color-accent)] rounded-xl hover:from-[var(--color-accent)]/30 hover:to-[var(--color-secondary)]/20 transition-all duration-[var(--transition-fast)]"
-            title={t('copy')}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-          </button>
-          <button
-            onClick={() => onOpenFolder(save)}
-            className="p-2.5 bg-gradient-to-br from-[var(--color-warning)]/20 to-[var(--color-warning-light)]/10 text-[var(--color-warning)] rounded-xl hover:from-[var(--color-warning)]/30 hover:to-[var(--color-warning-light)]/20 transition-all duration-[var(--transition-fast)]"
-            title={t('openBackupFolder')}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 20H4a2 2 0 01-2-2V6a2 2 0 012-2h5.172a1 1 0 01.707.293l5.858 5.857a1 1 0 01.293.707V18a2 2 0 01-2 2z"
-              />
-            </svg>
-          </button>
-          {!save.banUpdate && (
-            <button
-              onClick={() => onUpdate(save.id)}
-              className="p-2.5 bg-gradient-to-br from-[var(--color-info)]/20 to-[var(--color-info-light)]/10 text-[var(--color-info)] rounded-xl hover:from-[var(--color-info)]/30 hover:to-[var(--color-info-light)]/20 transition-all duration-[var(--transition-fast)]"
-              title={t('update')}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-            </button>
-          )}
-          <button
-            onClick={() => onRestore(save)}
-            className="p-2.5 bg-gradient-to-br from-[var(--color-success)]/20 to-[var(--color-success-light)]/10 text-[var(--color-success)] rounded-xl hover:from-[var(--color-success)]/30 hover:to-[var(--color-success-light)]/20 transition-all duration-[var(--transition-fast)]"
-            title={t('restore')}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
-            </svg>
-          </button>
-          <button
-            onClick={() => onDelete(save.id)}
-            className="p-2.5 bg-gradient-to-br from-[var(--color-danger)]/20 to-[var(--color-danger-light)]/10 text-[var(--color-danger)] rounded-xl hover:from-[var(--color-danger)]/30 hover:to-[var(--color-danger-light)]/20 transition-all duration-[var(--transition-fast)]"
-            title={t('delete')}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-          </button>
+          <ActionMenu
+            items={[
+              {
+                icon: (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                ),
+                title: t('edit'),
+                onClick: () => onEdit(save),
+              },
+              {
+                icon: (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                ),
+                title: t('copy'),
+                onClick: () => onCopy(save),
+              },
+              {
+                icon: (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20 20H4a2 2 0 01-2-2V6a2 2 0 012-2h5.172a1 1 0 01.707.293l5.858 5.857a1 1 0 01.293.707V18a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                ),
+                title: t('openBackupFolder'),
+                onClick: () => onOpenFolder(save),
+              },
+              ...(!save.banUpdate
+                ? [
+                    {
+                      icon: (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                          />
+                        </svg>
+                      ),
+                      title: t('update'),
+                      onClick: () => onUpdate(save.id),
+                    },
+                  ]
+                : []),
+              {
+                icon: (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                ),
+                title: t('restore'),
+                onClick: () => onRestore(save),
+              },
+              {
+                icon: (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                ),
+                title: t('delete'),
+                onClick: () => onDelete(save.id),
+              },
+            ]}
+          />
         </div>
       </div>
     </div>

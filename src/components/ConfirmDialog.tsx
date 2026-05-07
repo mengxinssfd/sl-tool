@@ -1,4 +1,4 @@
-import { useText } from '../i18n';
+import { useText } from '@/i18n';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -79,7 +79,7 @@ export function ConfirmDialog({
   const currentVariant = variants[variant];
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-md animate-fadeIn p-4">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-1000 backdrop-blur-md animate-fadeIn p-4">
       <div className="bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-card)] rounded-2xl p-8 w-full max-w-[50vw] min-w-[320px] shadow-[var(--shadow-xl)] animate-scaleIn border border-[var(--color-border)] glass max-h-[90vh] overflow-y-auto">
         <div className="flex items-start gap-5 mb-6">
           <div

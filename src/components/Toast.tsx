@@ -68,7 +68,7 @@ function ToastItem({
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-[var(--shadow-lg)] backdrop-blur-md animate-slideInRight ${currentColors.bg} ${currentColors.border} ${
+      className={`flex z-1000 items-center gap-3 px-4 py-3 rounded-xl border shadow-[var(--shadow-lg)] backdrop-blur-md animate-slideInRight ${currentColors.bg} ${currentColors.border} ${
         isExiting ? 'animate-slideOutRight' : ''
       }`}
     >

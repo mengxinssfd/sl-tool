@@ -1,8 +1,13 @@
 import { useState } from 'react';
 import { GameList } from './layout/GameList';
 import { SaveDetail } from './layout/SaveDetail';
-import { AddGameModal } from './components/AddGameModal';
-import { Toast, ToastType, ToastData } from './components/Toast';
+import {
+  AddGameModal,
+  ActionMenu,
+  Toast,
+  ToastType,
+  ToastData,
+} from '@/components';
 import { useText, changeLanguage, getCurrentLanguage } from './i18n';
 
 export function App() {
@@ -21,7 +26,7 @@ export function App() {
 
   return (
     <div className="h-screen flex flex-col bg-[var(--color-bg-primary)] overflow-hidden">
-      <header className="bg-[var(--color-bg-secondary)]/80 backdrop-blur-xl border-b border-[var(--color-border)] px-6 py-4 shadow-[var(--shadow-lg)]">
+      <header className="bg-[var(--color-bg-secondary)]/80 z-200 backdrop-blur-xl border-b border-[var(--color-border)] px-6 py-4 shadow-[var(--shadow-lg)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -51,28 +56,36 @@ export function App() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex gap-2">
-              <button
-                onClick={() => changeLanguage('en')}
-                className={`px-4 py-2 rounded-xl transition-all duration-[var(--transition-normal)] text-sm font-medium ${
-                  getCurrentLanguage() === 'en'
-                    ? 'bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-primary-light)] to-[var(--color-primary-dark)] text-white shadow-[var(--shadow-glow)]'
-                    : 'bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white border border-transparent hover:border-[var(--color-border)]'
-                }`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => changeLanguage('zh')}
-                className={`px-4 py-2 rounded-xl transition-all duration-[var(--transition-normal)] text-sm font-medium ${
-                  getCurrentLanguage() === 'zh'
-                    ? 'bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-primary-light)] to-[var(--color-primary-dark)] text-white shadow-[var(--shadow-glow)]'
-                    : 'bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white border border-transparent hover:border-[var(--color-border)]'
-                }`}
-              >
-                中文
-              </button>
-            </div>
+            <ActionMenu
+              items={[
+                {
+                  icon: (
+                    <span className="w-5 h-5 flex items-center justify-center text-xs font-bold">
+                      EN
+                    </span>
+                  ),
+                  title: 'English',
+                  onClick: () => changeLanguage('en'),
+                  className:
+                    getCurrentLanguage() === 'en'
+                      ? 'bg-[var(--color-primary)]/20 text-[var(--color-primary-light)]'
+                      : '',
+                },
+                {
+                  icon: (
+                    <span className="w-5 h-5 flex items-center justify-center text-xs font-bold">
+                      CN
+                    </span>
+                  ),
+                  title: '中文',
+                  onClick: () => changeLanguage('zh'),
+                  className:
+                    getCurrentLanguage() === 'zh'
+                      ? 'bg-[var(--color-primary)]/20 text-[var(--color-primary-light)]'
+                      : '',
+                },
+              ]}
+            />
           </div>
         </div>
       </header>

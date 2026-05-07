@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { SaveData } from '@/store/useGameStore';
 import { useText } from '@/i18n';
-import { SaveListItem } from '../components/SaveListItem';
-import { SaveListItemEdit } from '../components/SaveListItemEdit';
+import { SaveListItem, SaveListItemEdit } from '@/components';
 
 interface SaveListProps {
   saves: SaveData[];

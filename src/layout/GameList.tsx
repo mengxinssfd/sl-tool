@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Game, useGameStore } from '../store/useGameStore';
-import { useText } from '../i18n';
-import { ConfirmDialog } from '../components/ConfirmDialog';
-import { ToastType } from '../components/Toast';
-import { channel } from '../channel';
+import { Game, useGameStore } from '@/store/useGameStore';
+import { useText } from '@/i18n';
+import { ConfirmDialog, ToastType, ActionMenu } from '@/components';
+import { channel } from '@/channel';
 
 interface GameListProps {
   onAddGame: () => void;
@@ -111,65 +110,71 @@ export function GameList({ onAddGame, onToast }: GameListProps) {
             </div>
           </div>
           <div className="flex gap-2">
-            {games.length > 0 && (
-              <button
-                onClick={handleExportConfig}
-                className="w-11 h-11 px-3 py-2.5 bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] rounded-xl hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white transition-all duration-[var(--transition-normal)] text-sm font-medium flex items-center justify-center"
-                title={t('exportConfig')}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  />
-                </svg>
-              </button>
-            )}
-            <button
-              onClick={handleImportConfig}
-              className="w-11 h-11 px-3 py-2.5 bg-gradient-to-br from-[var(--color-bg-tertiary)] to-[var(--color-border-hover)] text-[var(--color-text-secondary)] rounded-xl hover:from-[var(--color-border-hover)] hover:to-[var(--color-border-light)] hover:text-white transition-all duration-[var(--transition-normal)] text-sm font-medium flex items-center justify-center"
-              title={t('importConfig')}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={onAddGame}
-              className="w-11 h-11 px-3 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] text-sm font-medium flex items-center justify-center hover:-translate-y-0.5 active:translate-y-0"
-              title={t('addGame')}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </button>
+            <ActionMenu
+              items={[
+                {
+                  icon: (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  ),
+                  title: t('addGame'),
+                  onClick: onAddGame,
+                },
+                ...(games.length > 0
+                  ? [
+                      {
+                        icon: (
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                            />
+                          </svg>
+                        ),
+                        title: t('exportConfig'),
+                        onClick: handleExportConfig,
+                      },
+                    ]
+                  : []),
+                {
+                  icon: (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                  ),
+                  title: t('importConfig'),
+                  onClick: handleImportConfig,
+                },
+              ]}
+            />
           </div>
         </div>
       </div>
@@ -229,7 +234,10 @@ export function GameList({ onAddGame, onToast }: GameListProps) {
                     : 'bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)] hover:border-[var(--color-border-hover)]'
                 }`}
                 onClick={() => selectGame(game.id)}
-                style={{ animationDelay: `${index * 50}ms` }}
+                style={{
+                  animationDelay: `${index * 50}ms`,
+                  zIndex: 10 - index,
+                }}
               >
                 {selectedGameId === game.id && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-[var(--color-primary)] to-[var(--color-secondary)] rounded-r-full"></div>
@@ -281,27 +289,32 @@ export function GameList({ onAddGame, onToast }: GameListProps) {
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(game.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 p-2.5 text-[var(--color-danger)] hover:text-white hover:bg-[var(--color-danger)]/20 rounded-xl transition-all duration-[var(--transition-fast)]"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
+                  <ActionMenu
+                    items={[
+                      {
+                        icon: (
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        ),
+                        title: t('delete'),
+                        onClick: () => {
+                          handleDelete(game.id);
+                        },
+                      },
+                    ]}
+                    className="opacity-0 group-hover:opacity-100"
+                  />
                 </div>
               </li>
             ))}

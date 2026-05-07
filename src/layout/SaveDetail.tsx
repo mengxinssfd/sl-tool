@@ -8,11 +8,14 @@ import {
 import { useText } from '@/i18n';
 import { channel } from '@/channel';
 import { SaveList } from './SaveList';
-import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { ToastType } from '@/components/Toast';
-import { AddSaveModal } from '@/components/AddSaveModal';
-import { EditGameModal } from '@/components/EditGameModal';
-import { UnselectedGame } from '@/layout/UnselectedGame';
+import {
+  ConfirmDialog,
+  ToastType,
+  AddSaveModal,
+  EditGameModal,
+  ActionMenu,
+} from '@/components';
+import { UnselectedGame } from './UnselectedGame';
 
 interface SaveDetailProps {
   onToast: (type: ToastType, message: string) => void;
@@ -313,7 +316,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
 
   return (
     <div className="h-full flex flex-col bg-[var(--color-bg-primary)]">
-      <div className="p-6 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50 backdrop-blur-sm">
+      <div className="relative z-100 p-6 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50 backdrop-blur-sm">
         <div className="flex justify-between items-start">
           <div className="flex-1">
             <div className="flex items-center gap-4">
@@ -401,71 +404,77 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
             </div>
           </div>
           <div className="flex items-center gap-2 ml-6">
-            <button
-              onClick={() => setShowEditGameModal(true)}
-              className="w-11 h-11 px-3 py-2.5 bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] rounded-xl hover:bg-[var(--color-border-hover)] hover:text-white transition-all duration-[var(--transition-normal)] font-medium flex items-center justify-center border border-transparent hover:border-[var(--color-border)]"
-              title={t('edit')}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-            </button>
-            {selectedGame.gameExecutablePath && (
-              <button
-                onClick={handleStartGame}
-                className="w-11 h-11 px-3 py-2.5 bg-gradient-to-r from-[var(--color-success)] to-[var(--color-success-hover)] text-white rounded-xl hover:shadow-[var(--shadow-md)] transition-all duration-[var(--transition-normal)] font-medium flex items-center justify-center"
-                title={t('startGame')}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </button>
-            )}
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="w-11 h-11 px-3 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white rounded-xl hover:shadow-[var(--shadow-glow)] transition-all duration-[var(--transition-normal)] font-medium flex items-center justify-center hover:-translate-y-0.5 active:translate-y-0"
-              title={t('newSave')}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </button>
+            <ActionMenu
+              items={[
+                {
+                  icon: (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  ),
+                  title: t('newSave'),
+                  onClick: () => setShowAddModal(true),
+                },
+                {
+                  icon: (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  ),
+                  title: t('edit'),
+                  onClick: () => setShowEditGameModal(true),
+                },
+                ...(selectedGame.gameExecutablePath
+                  ? [
+                      {
+                        icon: (
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        ),
+                        title: t('startGame'),
+                        onClick: handleStartGame,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
           </div>
         </div>
       </div>
