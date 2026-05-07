@@ -83,7 +83,7 @@ function createMainWindow(): BrowserWindow {
     win.loadURL(url);
     win.webContents.openDevTools();
   } else {
-    win.loadFile(path.join(__dirname, '../../dist/index.html'));
+    win.loadFile('dist/index.html');
   }
   return win;
 }

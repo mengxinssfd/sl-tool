@@ -91,15 +91,16 @@ npm run package
 
 ```
 .
-├── electron/           # Electron 主进程代码
-│   ├── main/          # 主进程入口和监听器
+├── electron/          # Electron 主进程代码
+│   ├── index.ts       # 主进程入口
+│   ├── listeners.ts   # 监听器
 │   └── preload.ts     # 预加载脚本
 ├── src/               # React 渲染进程代码
 │   ├── components/    # UI 组件
 │   ├── store/         # 状态管理
 │   ├── i18n/          # 国际化配置
 │   ├── App.tsx        # 主应用组件
-│   ├── main.tsx       # 应用入口
+│   ├── index.tsx      # 应用入口
 │   └── index.css      # 全局样式
 ├── index.html         # HTML 模板
 ├── vite.config.ts     # Vite 配置

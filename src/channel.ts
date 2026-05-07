@@ -1,4 +1,4 @@
-import type { Preload } from '../electron/main/preload';
+import type { Preload } from '../electron/preload';
 
 // declare global {
 //   interface Window {

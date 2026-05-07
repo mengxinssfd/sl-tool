@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "author": "DYH",
-  "main": "dist-electron/main/index.js",
+  "main": "dist-electron/index.js",
   "scripts": {
     "dev": "vite",
     "build": "npm run ts-check:* && vite build && electron-builder",
@@ -72,7 +72,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.10",
-    "vite-electron-plugin": "^0.8.3",
+    "vite-plugin-electron": "^0.29.1",
     "vitest": "^4.1.5"
   }
 }
