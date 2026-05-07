@@ -19,6 +19,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
   const [editingSave, setEditingSave] = useState<SaveData | null>(null);
   const [newSaveName, setNewSaveName] = useState('');
   const [newSaveNote, setNewSaveNote] = useState('');
+  const [newSaveBanUpdate, setNewSaveBanUpdate] = useState(false);
   const [editGameName, setEditGameName] = useState('');
   const [editGameSavePath, setEditGameSavePath] = useState('');
   const [editGameBackupPath, setEditGameBackupPath] = useState('');
@@ -68,9 +69,11 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
         newSaveName.trim(),
         newSaveNote.trim(),
         backupFileName,
+        newSaveBanUpdate,
       );
       setNewSaveName('');
       setNewSaveNote('');
+      setNewSaveBanUpdate(false);
       setShowAddModal(false);
       onToast('success', t('saveCreated'));
     } else {
@@ -125,6 +128,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       name: editingSave.name,
       note: editingSave.note,
       backupFileName: newBackupFileName,
+      banUpdate: editingSave.banUpdate,
     });
     setEditingSave(null);
     if (editingSave.name !== originSave.name) {
@@ -617,6 +621,25 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
                   className="w-full px-4 py-3 bg-[var(--color-bg-card)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)] resize-none"
                   rows={3}
                 />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[var(--color-text-secondary)] text-sm font-medium">
+                  {t('banUpdate')}
+                </span>
+                <button
+                  onClick={() => setNewSaveBanUpdate(!newSaveBanUpdate)}
+                  className={`relative w-12 h-6 rounded-full transition-all duration-[var(--transition-normal)] ${
+                    newSaveBanUpdate
+                      ? 'bg-gradient-to-r from-[var(--color-success)] to-[var(--color-success-hover)]'
+                      : 'bg-[var(--color-bg-tertiary)]'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-[var(--transition-normal)] ${
+                      newSaveBanUpdate ? 'left-7' : 'left-1'
+                    }`}
+                  />
+                </button>
               </div>
               <div className="flex gap-3 pt-2">
                 <button

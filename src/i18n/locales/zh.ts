@@ -89,4 +89,5 @@ export const zhTranslation: TranslationKeys = {
   hoursAgo: '{{hours}}小时前更新',
   minutesAgo: '{{minutes}}分钟前更新',
   justNow: '刚刚更新',
+  banUpdate: '禁止更新',
 };

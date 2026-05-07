@@ -8,6 +8,7 @@ export interface SaveData {
   updatedAt: number;
   note: string;
   backupFileName: string;
+  banUpdate: boolean;
 }
 
 export interface Game {
@@ -43,6 +44,7 @@ interface GameStore {
     name: string,
     note?: string,
     backupFileName?: string,
+    banUpdate?: boolean,
   ) => void;
   deleteSave: (gameId: string, saveId: string) => void;
   updateSave: (
@@ -132,7 +134,13 @@ export const useGameStore = create<GameStore>((set) => ({
     set({ selectedGameId: id });
   },
 
-  addSave: (gameId, name, note = '', backupFileName = '') => {
+  addSave: (
+    gameId,
+    name,
+    note = '',
+    backupFileName = '',
+    banUpdate = false,
+  ) => {
     const timestamp = Date.now();
     const fileName = backupFileName || `save_${timestamp}.bak`;
     const newSave: SaveData = {
@@ -142,6 +150,7 @@ export const useGameStore = create<GameStore>((set) => ({
       updatedAt: timestamp,
       note,
       backupFileName: fileName,
+      banUpdate,
     };
     set((state) => {
       const newGames = state.games.map((game) =>
@@ -207,6 +216,7 @@ function copySave(save: SaveData): SaveData {
     backupFileName: save.backupFileName,
     updatedAt: save.updatedAt,
     createdAt: save.createdAt,
+    banUpdate: save.banUpdate,
   };
 }
 

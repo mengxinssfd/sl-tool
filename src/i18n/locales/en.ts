@@ -94,4 +94,5 @@ export const enTranslation: TranslationKeys = {
   hoursAgo: 'Updated {{hours}}h ago',
   minutesAgo: 'Updated {{minutes}}m ago',
   justNow: 'Updated just now',
+  banUpdate: 'Ban Update',
 };

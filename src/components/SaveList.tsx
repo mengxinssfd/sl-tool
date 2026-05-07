@@ -97,6 +97,30 @@ export function SaveList({
                   className="w-full px-4 py-3 bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] rounded-xl border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all duration-[var(--transition-fast)] resize-none"
                   rows={2}
                 />
+                <div className="flex items-center justify-between">
+                  <span className="text-[var(--color-text-secondary)] text-sm font-medium">
+                    {t('banUpdate')}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setEditingSave({
+                        ...editingSave,
+                        banUpdate: !editingSave.banUpdate,
+                      })
+                    }
+                    className={`relative w-12 h-6 rounded-full transition-all duration-[var(--transition-normal)] ${
+                      editingSave.banUpdate
+                        ? 'bg-gradient-to-r from-[var(--color-success)] to-[var(--color-success-hover)]'
+                        : 'bg-[var(--color-bg-tertiary)]'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-[var(--transition-normal)] ${
+                        editingSave.banUpdate ? 'left-7' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
                 <div className="flex gap-3">
                   <button
                     onClick={onSaveEdit}
@@ -250,25 +274,27 @@ export function SaveList({
                       />
                     </svg>
                   </button>
-                  <button
-                    onClick={() => onUpdate(save.id)}
-                    className="p-2.5 bg-gradient-to-br from-[var(--color-info)]/20 to-[var(--color-info-light)]/10 text-[var(--color-info)] rounded-xl hover:from-[var(--color-info)]/30 hover:to-[var(--color-info-light)]/20 transition-all duration-[var(--transition-fast)]"
-                    title={t('update')}
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  {!save.banUpdate && (
+                    <button
+                      onClick={() => onUpdate(save.id)}
+                      className="p-2.5 bg-gradient-to-br from-[var(--color-info)]/20 to-[var(--color-info-light)]/10 text-[var(--color-info)] rounded-xl hover:from-[var(--color-info)]/30 hover:to-[var(--color-info-light)]/20 transition-all duration-[var(--transition-fast)]"
+                      title={t('update')}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                        />
+                      </svg>
+                    </button>
+                  )}
                   <button
                     onClick={() => onRestore(save)}
                     className="p-2.5 bg-gradient-to-br from-[var(--color-success)]/20 to-[var(--color-success-light)]/10 text-[var(--color-success)] rounded-xl hover:from-[var(--color-success)]/30 hover:to-[var(--color-success-light)]/20 transition-all duration-[var(--transition-fast)]"
