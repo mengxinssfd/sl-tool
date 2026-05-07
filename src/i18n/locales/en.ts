@@ -12,7 +12,7 @@ export const enTranslation: TranslationKeys = {
   noGames: 'No Games',
   addGameHint: 'Click the button above to add a game',
   deleteGameConfirm:
-    'Are you sure you want to delete this game? All related saves will also be deleted.',
+    'Are you sure you want to delete this game configuration? Save files will not be deleted.',
   saveManager: 'Game Save Manager',
   savePath: 'Save Path',
   backupPath: 'Backup Path',

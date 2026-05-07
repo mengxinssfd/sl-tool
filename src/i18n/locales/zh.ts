@@ -11,7 +11,7 @@ export const zhTranslation: TranslationKeys = {
   addGame: '添加游戏',
   noGames: '暂无游戏',
   addGameHint: '点击上方按钮添加游戏',
-  deleteGameConfirm: '确定要删除这个游戏吗？所有相关存档也会被删除。',
+  deleteGameConfirm: '确定要删除这个游戏配置吗？存档文件不会被删除。',
   saveManager: '游戏存档管理器',
   savePath: '存档位置',
   backupPath: '备份路径',
