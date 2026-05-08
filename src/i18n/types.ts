@@ -87,5 +87,5 @@ export interface TranslationKeys {
   hoursAgo: string;
   minutesAgo: string;
   justNow: string;
-  banUpdate: string;
+  locked: string;
 }

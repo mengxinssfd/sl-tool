@@ -26,8 +26,8 @@ export function SaveListItemEdit({
     onChange({ ...save, note: value });
   };
 
-  const handleBanUpdateChange = () => {
-    onChange({ ...save, banUpdate: !save.banUpdate });
+  const handleLockedChange = () => {
+    onChange({ ...save, locked: !save.locked });
   };
 
   return (
@@ -53,19 +53,19 @@ export function SaveListItemEdit({
         />
         <div className="flex items-center justify-between">
           <span className="text-[var(--color-text-secondary)] text-sm font-medium">
-            {t('banUpdate')}
+            {t('locked')}
           </span>
           <button
-            onClick={handleBanUpdateChange}
+            onClick={handleLockedChange}
             className={`relative w-12 h-6 rounded-full transition-all duration-[var(--transition-normal)] ${
-              save.banUpdate
+              save.locked
                 ? 'bg-gradient-to-r from-[var(--color-success)] to-[var(--color-success-hover)]'
                 : 'bg-[var(--color-bg-tertiary)]'
             }`}
           >
             <span
               className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-[var(--transition-normal)] ${
-                save.banUpdate ? 'left-7' : 'left-1'
+                save.locked ? 'left-7' : 'left-1'
               }`}
             />
           </button>

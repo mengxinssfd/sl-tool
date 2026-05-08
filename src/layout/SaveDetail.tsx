@@ -51,11 +51,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
     });
   };
 
-  const handleAddSave = async (
-    name: string,
-    note: string,
-    banUpdate: boolean,
-  ) => {
+  const handleAddSave = async (name: string, note: string, locked: boolean) => {
     if (!name.trim() || !selectedGame) return;
 
     if (!selectedGame.backupPath) {
@@ -63,7 +59,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       return;
     }
 
-    const newSaveData = addSave(selectedGame.id, name, note, banUpdate);
+    const newSaveData = addSave(selectedGame.id, name, note, locked);
 
     const reason = await channel.saveBackup(
       [selectedGame.savePath],
@@ -120,7 +116,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       ...originSave,
       name: editingSave.name,
       note: editingSave.note,
-      banUpdate: editingSave.banUpdate,
+      locked: editingSave.locked,
     });
     updateSave(selectedGame.id, editingSave.id, newSaveData);
     if (editingSave.name !== originSave.name) {
@@ -293,12 +289,7 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
       return;
     }
     const name = `${save.name} (${t('copy')})`;
-    const newSaveData = addSave(
-      selectedGame.id,
-      name,
-      save.note,
-      save.banUpdate,
-    );
+    const newSaveData = addSave(selectedGame.id, name, save.note, save.locked);
     const reason = await channel.saveBackup(
       [selectedGame.backupPath, save.backupFileName],
       [selectedGame.backupPath, newSaveData.backupFileName],

@@ -5,7 +5,7 @@ import { Modal } from './Modal';
 interface AddSaveModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (name: string, note: string, banUpdate: boolean) => void;
+  onConfirm: (name: string, note: string, locked: boolean) => void;
 }
 
 export function AddSaveModal({
@@ -16,14 +16,14 @@ export function AddSaveModal({
   const t = useText();
   const [name, setName] = useState('');
   const [note, setNote] = useState('');
-  const [banUpdate, setBanUpdate] = useState(false);
+  const [locked, setLocked] = useState(false);
 
   const handleConfirm = () => {
     if (!name.trim()) return;
-    onConfirm(name.trim(), note.trim(), banUpdate);
+    onConfirm(name.trim(), note.trim(), locked);
     setName('');
     setNote('');
-    setBanUpdate(false);
+    setLocked(false);
     onClose();
   };
 
@@ -81,19 +81,19 @@ export function AddSaveModal({
       </div>
       <div className="flex items-center justify-between">
         <span className="text-[var(--color-text-secondary)] text-sm font-medium">
-          {t('banUpdate')}
+          {t('locked')}
         </span>
         <button
-          onClick={() => setBanUpdate(!banUpdate)}
+          onClick={() => setLocked(!locked)}
           className={`relative w-12 h-6 rounded-full transition-all duration-[var(--transition-normal)] ${
-            banUpdate
+            locked
               ? 'bg-gradient-to-r from-[var(--color-success)] to-[var(--color-success-hover)]'
               : 'bg-[var(--color-bg-tertiary)]'
           }`}
         >
           <span
             className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-[var(--transition-normal)] ${
-              banUpdate ? 'left-7' : 'left-1'
+              locked ? 'left-7' : 'left-1'
             }`}
           />
         </button>
