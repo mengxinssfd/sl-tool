@@ -10,6 +10,8 @@ interface SaveListProps {
   onSaveEdit: (save: SaveData) => void;
   onUpdate: (saveId: string) => void;
   onRestore: (save: SaveData) => void;
+  onRestoreAndStart: (save: SaveData) => void;
+  hasExecutable: boolean;
   onCopy: (save: SaveData) => void;
   onOpenFolder: (save: SaveData) => void;
 }
@@ -21,6 +23,8 @@ export function SaveList({
   onSaveEdit,
   onUpdate,
   onRestore,
+  onRestoreAndStart,
+  hasExecutable,
   onCopy,
   onOpenFolder,
 }: SaveListProps) {
@@ -103,6 +107,8 @@ export function SaveList({
               onDelete={onDelete}
               onUpdate={onUpdate}
               onRestore={onRestore}
+              onRestoreAndStart={onRestoreAndStart}
+              hasExecutable={hasExecutable}
               onCopy={onCopy}
               onOpenFolder={onOpenFolder}
             />

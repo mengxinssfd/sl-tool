@@ -88,4 +88,5 @@ export interface TranslationKeys {
   minutesAgo: string;
   justNow: string;
   locked: string;
+  restoreAndStart: string;
 }

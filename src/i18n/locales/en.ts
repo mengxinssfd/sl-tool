@@ -95,4 +95,5 @@ export const enTranslation: TranslationKeys = {
   minutesAgo: 'Updated {{minutes}}m ago',
   justNow: 'Updated just now',
   locked: 'Locked',
+  restoreAndStart: 'Restore and Start',
 };

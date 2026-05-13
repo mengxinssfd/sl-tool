@@ -11,6 +11,8 @@ interface SaveListItemProps {
   onDelete: (saveId: string) => void;
   onUpdate: (saveId: string) => void;
   onRestore: (save: SaveData) => void;
+  onRestoreAndStart: (save: SaveData) => void;
+  hasExecutable: boolean;
   onCopy: (save: SaveData) => void;
   onOpenFolder: (save: SaveData) => void;
 }
@@ -23,6 +25,8 @@ export function SaveListItem({
   onDelete,
   onUpdate,
   onRestore,
+  onRestoreAndStart,
+  hasExecutable,
   onCopy,
   onOpenFolder,
 }: SaveListItemProps) {
@@ -245,6 +249,41 @@ export function SaveListItem({
                 title: t('restore'),
                 onClick: () => onRestore(save),
               },
+              ...(hasExecutable
+                ? [
+                    {
+                      icon: (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      ),
+                      title: t('restoreAndStart'),
+                      onClick: () => onRestoreAndStart(save),
+                    },
+                  ]
+                : []),
               ...(!save.locked
                 ? [
                     {

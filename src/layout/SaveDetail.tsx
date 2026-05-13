@@ -281,6 +281,34 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
     setRestoreTargetSave(null);
   };
 
+  const handleRestoreAndStart = async (save: SaveData) => {
+    if (!selectedGame) return;
+
+    if (!selectedGame.backupPath || !save.backupFileName) {
+      onToast('warning', t('noBackupFile'));
+      return;
+    }
+
+    const reason = await channel.saveBackup(
+      [selectedGame.backupPath, save.backupFileName],
+      [selectedGame.savePath],
+    );
+
+    if (!reason) {
+      onToast('success', t('saveRestored'));
+      const startReason = await channel.startGame(
+        selectedGame.gameExecutablePath,
+      );
+      if (startReason) {
+        console.error('Failed to start game:', startReason);
+        onToast('error', t('startGameFailed'));
+      }
+    } else {
+      console.error('saveRestoreFailed', reason);
+      onToast('error', t('saveRestoreFailed'));
+    }
+  };
+
   const handleCopySave = async (save: SaveData) => {
     if (!selectedGame) return;
 
@@ -479,6 +507,8 @@ export function SaveDetail({ onToast }: SaveDetailProps) {
             onSaveEdit={handleSaveEdit}
             onUpdate={handleUpdateSave}
             onRestore={(save) => handleRestoreSave(save)}
+            onRestoreAndStart={(save) => handleRestoreAndStart(save)}
+            hasExecutable={!!selectedGame.gameExecutablePath}
             onCopy={(save) => handleCopySave(save)}
             onOpenFolder={(save) => handleOpenBackupFolder(save)}
           />

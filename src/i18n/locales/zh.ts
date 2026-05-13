@@ -90,4 +90,5 @@ export const zhTranslation: TranslationKeys = {
   minutesAgo: '{{minutes}}分钟前更新',
   justNow: '刚刚更新',
   locked: '锁定',
+  restoreAndStart: '还原并启动',
 };
