@@ -42,7 +42,6 @@ export function addSaveBackupListener(ipc: IpcMain) {
     async (event, channel: string, from: string[], to: string[]) => {
       const fromDirPath = path.join(...from);
       const toDirPath = path.join(...to);
-      console.log(fromDirPath, '----', toDirPath);
       try {
         if (!fs.existsSync(fromDirPath)) {
           event.reply(channel, `${fromDirPath} unexist`);
@@ -143,14 +142,22 @@ export function addOpenFolderListener(ipc: IpcMain) {
 export function addStartGameListener(ipc: IpcMain) {
   ipc.on(
     Signal.EXE_FILE,
-    async (event: IpcMainEvent, channel: string, executablePath: string) => {
-      if (!fs.existsSync(executablePath)) {
+    async (event: IpcMainEvent, channel: string, value: string) => {
+      let executablePath = value;
+      let args: string[] = [];
+      // 执行文件[命令行参数1，命令行参数2...]
+      const re = /\[([^\]]+)]$/.exec(value);
+      if (re) {
+        executablePath = value.slice(0, -re[0].length);
+        args = re[1]?.split(',') ?? [];
+      }
+      if (!executablePath || !fs.existsSync(executablePath)) {
         event.reply(channel, `${executablePath} unexist`);
         return;
       }
       try {
         const cwd = path.dirname(executablePath);
-        spawn(executablePath, [], {
+        spawn(executablePath, args, {
           cwd,
           detached: true,
           stdio: 'ignore',
